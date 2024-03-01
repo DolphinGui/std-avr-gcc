@@ -38,10 +38,9 @@ make -j16
 make install
 cd ../../
 
-#cd gcc-13.2.0
-#cd obj
-#../configure --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --with-newlib --disable-__cxa_atexit --disable-threads --disable-shared --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool --program-prefix=avr- --enable-cxx-flags='-fexceptions -frtti' --enable-c-flags='-fexceptions' --enable-clocale=generic
-# --disable-hosted-libstdcxx 
-#make -j16
-#make install
+cd gcc
+cd obj
+../configure --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --with-newlib --disable-__cxa_atexit --disable-threads --disable-shared --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool --program-prefix=avr- --enable-cxx-flags='-fexceptions -frtti' --enable-c-flags='-fexceptions' --disable-hosted-libstdcxx 
+make -j16
+make install
 

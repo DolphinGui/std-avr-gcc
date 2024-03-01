@@ -18,7 +18,7 @@ class AvrGnuToolchain(ConanFile):
     settings = "os", "arch", 'compiler', 'build_type'
     exports_sources = "toolchain.cmake"
     package_type = "application"
-    version = "0.2.0"
+    version = "0.3.0"
 
 
     @property
@@ -58,7 +58,7 @@ class AvrGnuToolchain(ConanFile):
         download(self, 
             f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.version}-alpha/avr-{self.version}.tar.gz',
             filename='a.tar.gz',
-            md5='fa1e03cf660b33c99ab379b6ea768111')
+            md5='2d952febde84693380f1edc1d00ff18a')
         unzip(self, 'a.tar.gz')
 
     def package(self):
