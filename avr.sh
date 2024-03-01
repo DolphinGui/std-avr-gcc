@@ -1,11 +1,6 @@
 #!/usr/bin/sh
-#This is a step-by-step guide to build the avr-gcc 10.2 with the
-#libstdc++ using the freestanding implementation[1]. 
-#
-#Don't expect a robust script without boilerplates or something coded
-#to be resilient. This is only a short register of what I need to
-#obtain the compiler in this mode.
-#
+# from https://gist.github.com/ricardocosme/5ec8ad05b5f4adb66464a146dcc41545,
+# replace with later with some
 #[1] https://timsong-cpp.github.io/cppwp/n4861/compliance
 
 BASEDIR=$(realpath $(dirname $0))
@@ -32,7 +27,7 @@ cd obj
 make -j32
 make install
 cd ../..
-exit
+
 wget http://download.savannah.gnu.org/releases/avr-libc/avr-libc-2.1.0.tar.bz2
 tar jxf avr-libc-2.1.0.tar.bz2
 cd avr-libc-2.1.0

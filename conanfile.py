@@ -1,0 +1,99 @@
+from conan import ConanFile
+from conan.tools.files import get, copy, download, unzip
+from conan.errors import ConanInvalidConfiguration
+import os
+
+# copied and modified from https://github.com/libhal-google/arm-gnu-toolchain/tree/main
+
+required_conan_version = ">=1.60.2"
+
+
+class ArmGnuToolchain(ConanFile):
+    name = "arm-gnu-toolchain"
+    license = ("GPL-3.0-only")
+    # url = "https://github.com/conan-io/conan-center-index"
+    # homepage = ""
+    description = ("Conan installer for a patched GNU AVR embedded toolchain")
+    topics = ("gcc", "compiler", "embedded", "avr")
+    settings = "os", "arch", 'compiler', 'build_type'
+    exports_sources = "toolchain.cmake"
+    package_type = "application"
+    version = "0.2.0"
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    def validate(self):
+        supported_build_operating_systems = ["Linux"]
+        if not self._settings_build.os in supported_build_operating_systems:
+            raise ConanInvalidConfiguration(
+                f"The build os '{self._settings_build.os}' is not supported. "
+                "Pre-compiled binaries are only available for "
+                f"{supported_build_operating_systems}."
+            )
+
+        supported_build_architectures = {
+            "Linux": ["x86_64"]
+        }
+
+        if (
+            not self._settings_build.arch
+            in supported_build_architectures[str(self._settings_build.os)]
+        ):
+            build_os = str(self._settings_build.os)
+            raise ConanInvalidConfiguration(
+                f"The build architecture '{self._settings_build.arch}' "
+                f"is not supported for {self._settings_build.os}. "
+                "Pre-compiled binaries are only available for "
+                f"{supported_build_architectures[build_os]}."
+            )
+
+    def source(self):
+        pass
+
+    def build(self):
+        if self.license_url:
+            download(self, self.license_url, "LICENSE", verify=False)
+
+        download(self, 
+            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.version}-alpha/avr-{self.version}.tar.gz',
+            md5='fa1e03cf660b33c99ab379b6ea768111')
+        unzip(self, f'avr-{self.version}.tar.gz')
+
+    def package(self):
+        destination = os.path.join(self.package_folder, "bin")
+
+        copy(self, src=os.path.join(self.build_folder, 'root'),
+             dst=destination, keep_path=True)
+
+    def package_info(self):
+        bindir = os.path.join(self.package_folder, "bin")
+
+        cc = os.path.join(bindir, 'avr-gcc')
+        self.output.info("Creating CC env var with: " + cc)
+        self.buildenv_info.define("CC", cc)
+
+        cxx = os.path.join(bindir, 'avr-g++')
+        self.output.info("Creating CXX env var with: " + cxx)
+        self.buildenv_info.define("CXX", cxx)
+
+        ar = os.path.join(bindir, 'avr-gcc-ar')
+        self.output.info("Creating AR env var with: " + ar)
+        self.buildenv_info.define("AR", ar)
+
+        nm = os.path.join(bindir, f"avr-gcc-nm")
+        self.output.info("Creating NM env var with: " + nm)
+        self.buildenv_info.define("NM", nm)
+
+        ranlib = os.path.join(bindir, f"avr-gcc-ranlib")
+        self.output.info("Creating RANLIB env var with: " + ranlib)
+        self.buildenv_info.define("RANLIB", ranlib)
+
+        # TODO: Remove after conan 2.0 is released
+        self.env_info.CC = cc
+        self.env_info.CXX = cxx
+        self.env_info.FC = fc
+        self.env_info.AR = ar
+        self.env_info.NM = nm
+        self.env_info.RANLIB = ranlib
