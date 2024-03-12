@@ -60,7 +60,7 @@ class AvrGnuToolchain(ConanFile):
         download(self,
             f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/avr.tar.gz',
             filename='a.tar.gz',
-            md5='2d952febde84693380f1edc1d00ff18a')
+            verify=False)
         unzip(self, 'a.tar.gz')
 
     def package(self):
