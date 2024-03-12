@@ -18,7 +18,10 @@ class AvrGnuToolchain(ConanFile):
     settings = "os", "arch", 'compiler', 'build_type'
     exports_sources = "toolchain.cmake"
     package_type = "application"
-    version = "0.3.0"
+    major=0
+    minor=3
+    patch=3
+    version = f"{major}.{minor}.{patch}"
 
 
     @property
@@ -54,9 +57,8 @@ class AvrGnuToolchain(ConanFile):
         pass
 
     def build(self):
-
-        download(self, 
-            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.version}-alpha/avr-{self.version}.tar.gz',
+        download(self,
+            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/avr.tar.gz',
             filename='a.tar.gz',
             md5='2d952febde84693380f1edc1d00ff18a')
         unzip(self, 'a.tar.gz')
@@ -87,6 +89,10 @@ class AvrGnuToolchain(ConanFile):
         ranlib = os.path.join(bindir, f"avr-gcc-ranlib")
         self.output.info("Creating RANLIB env var with: " + ranlib)
         self.buildenv_info.define("RANLIB", ranlib)
+
+        strip = os.path.join(bindir, "avr-strip")
+        self.output.info("Creating STRIP env var with: " + strip)
+        self.buildenv_info.define("STRIP", strip)
 
         # TODO: Remove after conan 2.0 is released
         self.env_info.CC = cc
