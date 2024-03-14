@@ -12,7 +12,7 @@ HOST=""
 fi
 
 BASEDIR=$(realpath $(dirname $0))
-PREFIX=$BASEDIR/root
+PREFIX=$BASEDIR/"${$2:-root}"
 export PREFIX
 
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
