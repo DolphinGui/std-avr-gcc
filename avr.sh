@@ -31,17 +31,24 @@ cd ../..
 
 git clone --depth=1 https://github.com/avrdudes/avr-libc.git
 cd avr-libc
-git fetch --depth=1 22d588c80066102993263018d5324d1424c13f0d
+git fetch --depth=1 origin 22d588c80066102993263018d5324d1424c13f0d
+git checkout  22d588c80066102993263018d5324d1424c13f0d
+./bootstrap
 mkdir obj
 cd obj
 ../configure --prefix=$PREFIX --build=`../config.guess` --host=avr
-make -j16
+make -j32
 make install
 cd ../../
 
 cd gcc
 cd obj
 ../configure --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --with-newlib --disable-__cxa_atexit --disable-threads --disable-shared --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool --program-prefix=avr- --enable-cxx-flags='-fexceptions -frtti' --enable-c-flags='-fexceptions' --disable-hosted-libstdcxx 
-make -j16
+make -j32
 make install
+cd ../../
 
+git clone --depth=1 https://github.com/DolphinGui/avr-libstdcpp.git
+cd avr-libstdcpp
+./inject $PREFIX/avr/include/c++/14.0.1/
+cd ..
