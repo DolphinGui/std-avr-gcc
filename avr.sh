@@ -28,9 +28,10 @@ make -j32
 make install
 cd ../..
 
-wget http://download.savannah.gnu.org/releases/avr-libc/avr-libc-2.1.0.tar.bz2
-tar jxf avr-libc-2.1.0.tar.bz2
-cd avr-libc-2.1.0
+
+git clone --depth=1 https://github.com/avrdudes/avr-libc.git
+cd avr-libc
+git fetch --depth=1 22d588c80066102993263018d5324d1424c13f0d
 mkdir obj
 cd obj
 ../configure --prefix=$PREFIX --build=`../config.guess` --host=avr
