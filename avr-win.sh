@@ -37,7 +37,7 @@ confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.ta
 
 export PATH=$PREFIX/bin:$PATH
 
-ARGS="$HOST --prefix=$PREFIX --target=avr"
+ARGS="--host=avr --prefix=$PREFIX --build=x86_64-w64-mingw32"
 confbuild https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz gmp-6.3.0.tar.xz gmp-6.3.0 "$ARGS"
 
 confbuild https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz mpfr-4.2.1.tar.xz mpfr-4.2.1 "$ARGS"
@@ -48,7 +48,7 @@ git clone https://github.com/DolphinGui/gcc.git --depth=1
 cd gcc
 mkdir obj
 cd obj
-../configure $HOST --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --with-dwarf2 --program-prefix=avr-
+../configure $HOST --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --with-dwarf2 --program-prefix=avr- --with-gmp=$PREFIX --with-mpfr=$PREFIX --with-mpc=$PREFIX
 make -j32
 make install
 cd ../..
