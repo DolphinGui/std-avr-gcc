@@ -19,7 +19,8 @@ cd $WORKDIR
 export CC=x86_64-w64-mingw32-gcc
 export CXX=x86_64-w64-mingw32-gcc
 
-function confbuild(){
+confbuild()
+{
 wget $1
 dtrx $2
 cd $3
