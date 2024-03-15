@@ -9,8 +9,8 @@ HOST="--host=x86_64-mingw32"
 
 BASEDIR=$(realpath $(dirname $0))
 PREFIX=$BASEDIR/"${1:-root}"
-WORKDIR="${2:-work}"
-WINROOT="$WORKDIR/winroot"
+WORKDIR="$BASEDIR/${2:-work}"
+WINROOT="$BASEDIR/winroot"
 export PREFIX
 
 mkdir $WORKDIR

@@ -28,5 +28,4 @@ RUN apt-get update \
 
 ADD avr.sh avr.sh
 ADD avr-win.sh avr-win.sh
-RUN sh avr.sh
 
