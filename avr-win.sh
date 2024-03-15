@@ -37,7 +37,7 @@ confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.ta
 
 export PATH=$PREFIX/bin:$PATH
 
-ARGS="--host=avr --build=x86_64-w64-mingw32"
+ARGS="--host=avr --prefix=/usr/x86_64-w64-mingw32/ --build=x86_64-w64-mingw32"
 confbuild https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz gmp-6.3.0.tar.xz gmp-6.3.0 "$ARGS"
 
 confbuild https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz mpfr-4.2.1.tar.xz mpfr-4.2.1 "$ARGS"
