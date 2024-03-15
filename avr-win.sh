@@ -37,9 +37,12 @@ confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.ta
 
 export PATH=$PREFIX/bin:$PATH
 
-wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
-tar -Jxf gmp-6.3.0.tar.xz
+ARGS="$HOST --prefix=$PREFIX --target=avr"
+confbuild https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz gmp-6.3.0.tar.xz gmp-6.3.0 "$ARGS"
 
+confbuild https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz mpfr-4.2.1.tar.xz mpfr-4.2.1 "$ARGS"
+
+confbuild https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz mpc-1.3.1.tar.gz mpc-1.3.1 "$ARGS"
 
 git clone https://github.com/DolphinGui/gcc.git --depth=1
 cd gcc
