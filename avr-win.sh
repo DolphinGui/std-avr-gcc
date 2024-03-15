@@ -33,7 +33,7 @@ cd ../..
 }
 
 ARGS="--disable-bootstrap $HOST --prefix=$PREFIX --target=avr --disable-nls"
-confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.tar.gz  binutils-2.42 $ARGS
+confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.tar.gz  binutils-2.42 "$ARGS"
 
 export PATH=$PREFIX/bin:$PATH
 
