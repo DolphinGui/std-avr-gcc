@@ -5,7 +5,7 @@
 
 set -ex
 
-HOST="--host=x86_64-mingw32"
+HOST="--host=x86_64-w64-mingw32"
 
 BASEDIR=$(realpath $(dirname $0))
 PREFIX=$BASEDIR/"${1:-root}"
@@ -16,28 +16,34 @@ export PREFIX
 mkdir $WORKDIR
 cd $WORKDIR
 
-
-
 export CC=x86_64-w64-mingw32-gcc
 export CXX=x86_64-w64-mingw32-gcc
 
-wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
-tar zxf binutils-2.42.tar.gz
-cd binutils-2.42
+function confbuild(){
+wget $1
+dtrx $2
+cd $3
 mkdir obj
 cd obj
-../configure --disable-bootstrap $HOST --prefix=$PREFIX --target=avr --disable-nls
+../configure $4
 make -j32
 make install
-cd ../../
+cd ../..
+}
+
+ARGS="--disable-bootstrap $HOST --prefix=$PREFIX --target=avr --disable-nls"
+confbuild https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils-2.42.tar.gz  binutils-2.42 $ARGS
 
 export PATH=$PREFIX/bin:$PATH
+
+wget https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+tar -Jxf gmp-6.3.0.tar.xz
+
 
 git clone https://github.com/DolphinGui/gcc.git --depth=1
 cd gcc
 mkdir obj
 cd obj
-make distclean
 ../configure $HOST --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --with-dwarf2 --program-prefix=avr-
 make -j32
 make install

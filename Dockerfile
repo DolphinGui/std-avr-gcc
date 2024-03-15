@@ -11,6 +11,7 @@ RUN apt-get update \
         mingw-w64 \
         git \
         wget \
+        dtrx \
         autoconf2.64 \
         build-essential \
         netpbm \
