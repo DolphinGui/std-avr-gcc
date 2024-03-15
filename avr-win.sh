@@ -16,16 +16,10 @@ export PREFIX
 mkdir $WORKDIR
 cd $WORKDIR
 
-git clone https://github.com/DolphinGui/gcc.git --depth=1
-cd gcc
-mkdir obj
-cd obj
-../configure --prefix=$WINROOT --target=mingw32crt  --enable-languages=c,c++
-make -j32
-make install
-cd ../..
 
-exit
+
+export CC=x86_64-w64-mingw32-gcc
+export CXX=x86_64-w64-mingw32-gcc
 
 wget https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
 tar zxf binutils-2.42.tar.gz
@@ -39,8 +33,10 @@ cd ../../
 
 export PATH=$PREFIX/bin:$PATH
 
-
-cd gcc/obj
+git clone https://github.com/DolphinGui/gcc.git --depth=1
+cd gcc
+mkdir obj
+cd obj
 make distclean
 ../configure $HOST --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls --disable-libssp --with-dwarf2 --program-prefix=avr-
 make -j32
