@@ -27,6 +27,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ADD avr.sh avr.sh
-RUN sh avr.sh WIN winroot
+ADD avr-win.sh avr-win.sh
 RUN sh avr.sh
 
