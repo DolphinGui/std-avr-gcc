@@ -29,5 +29,4 @@ RUN   apt-get clean \
        && rm -rf /var/lib/apt/lists/*
 
 ADD avr.sh avr.sh
-ADD avr-win.sh avr-win.sh
-
+ADD work.sh work.sh

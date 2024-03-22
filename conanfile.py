@@ -19,8 +19,8 @@ class AvrGnuToolchain(ConanFile):
     exports_sources = "toolchain.cmake"
     package_type = "application"
     major=0
-    minor=3
-    patch=4
+    minor=4
+    patch=0
     version = f"{major}.{minor}.{patch}"
 
 
@@ -29,7 +29,7 @@ class AvrGnuToolchain(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
-        supported_build_operating_systems = ["Linux"]
+        supported_build_operating_systems = ["Linux", "Windows"]
         if not self._settings_build.os in supported_build_operating_systems:
             raise ConanInvalidConfiguration(
                 f"The build os '{self._settings_build.os}' is not supported. "
@@ -57,14 +57,21 @@ class AvrGnuToolchain(ConanFile):
         pass
 
     def build(self):
+        if  self._settings_build.os == "Linux":
+            file = "root.tar.xz"
+        elif self._settings_build.os == "Windows":
+            file = "winroot.tar.xz"
         download(self,
-            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/avr.tar.gz',
-            filename='a.tar.gz',
+            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
             verify=False)
-        unzip(self, 'a.tar.gz')
+        unzip(self, file)
 
     def package(self):
-        copy(self, pattern="*",src=os.path.join(self.build_folder, 'root'),
+        if  self._settings_build.os == "Linux":
+            dir = 'root'
+        elif self._settings_build.os == "Windows":
+            dir = 'winroot'
+        copy(self, pattern="*",src=os.path.join(self.build_folder, dir),
              dst=self.package_folder, keep_path=True)
 
     def package_info(self):
