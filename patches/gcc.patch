@@ -1,0 +1,61 @@
+diff --color -ruN gcc/gcc/common/config/avr/avr-common.cc gcc-new/gcc/common/config/avr/avr-common.cc
+--- gcc/gcc/common/config/avr/avr-common.cc	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/common/config/avr/avr-common.cc	2024-03-25 14:01:14.818922603 -0700
+@@ -148,6 +148,6 @@
+ #define TARGET_OPTION_OPTIMIZATION_TABLE avr_option_optimization_table
+ 
+ #undef TARGET_EXCEPT_UNWIND_INFO
+-#define TARGET_EXCEPT_UNWIND_INFO sjlj_except_unwind_info
++#define TARGET_EXCEPT_UNWIND_INFO dwarf2_except_unwind_info
+ 
+ struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
+diff --color -ruN gcc/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
+--- gcc/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr.cc	2024-03-25 14:45:06.992566725 -0700
+@@ -13521,6 +13521,16 @@
+   return NULL_TREE;
+ }
+ 
++/* Implements EH_RETURN_HANDLER_RTX */
++rtx
++avr_eh_return_handler_rtx (void)
++{
++  rtx tmp = avr_incoming_return_addr_rtx();
++
++  /* Mark the store volatile, so no optimization is permitted to remove it.  */
++  MEM_VOLATILE_P (tmp) = true;
++  return tmp;
++}
+ 
+ /* Implement `TARGET_LEGITIMATE_COMBINED_INSN'.  */
+ 
+diff --color -ruN gcc/gcc/config/avr/avr.h gcc-new/gcc/config/avr/avr.h
+--- gcc/gcc/config/avr/avr.h	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr.h	2024-03-25 14:46:55.662565258 -0700
+@@ -525,6 +525,15 @@
+ 
+ #define CR_TAB "\n\t"
+ 
++/* Used to define how dwarf exception handling is implemented. */
++#define EH_RETURN_DATA_REGNO(N) ((N + 18) <= 22 ? (N + 18) : INVALID_REGNUM)
++#define EH_RETURN_STACKADJ_RTX  gen_rtx_REG (Pmode, 24)
++  
++/* This might have to be changed to pcrel if the pointer is not big enough */
++#define ASM_PREFERRED_EH_DATA_FORMAT(CODE, GLOBAL)           (DW_EH_PE_absptr)
++#define EH_RETURN_HANDLER_RTX avr_eh_return_handler_rtx ()
++
++
+ #define DWARF2_ADDR_SIZE 4
+ 
+ #define INCOMING_RETURN_ADDR_RTX   avr_incoming_return_addr_rtx ()
+diff --color -ruN gcc/gcc/config/avr/avr-protos.h gcc-new/gcc/config/avr/avr-protos.h
+--- gcc/gcc/config/avr/avr-protos.h	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr-protos.h	2024-03-25 14:01:14.818922603 -0700
+@@ -84,6 +84,7 @@
+ 
+ extern void avr_expand_prologue (void);
+ extern void avr_expand_epilogue (bool);
++extern rtx avr_eh_return_handler_rtx (void);
+ extern bool avr_emit_cpymemhi (rtx*);
+ extern int avr_epilogue_uses (int regno);
+ 

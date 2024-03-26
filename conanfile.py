@@ -19,7 +19,7 @@ class AvrGnuToolchain(ConanFile):
     exports_sources = "toolchain.cmake"
     package_type = "application"
     major=0
-    minor=4
+    minor=5
     patch=0
     version = f"{major}.{minor}.{patch}"
 

@@ -30,3 +30,5 @@ RUN   apt-get clean \
 
 ADD avr.sh avr.sh
 ADD work.sh work.sh
+ADD patches patches
+ADD apply-paches.sh apply-patches.sh
