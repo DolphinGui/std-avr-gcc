@@ -1,0 +1,43 @@
+diff -ruN '--exclude=.git' '--exclude=obj' binutils-2.42/ld/scripttempl/avr.sc binutils-new/ld/scripttempl/avr.sc
+--- binutils-2.42/ld/scripttempl/avr.sc	2024-01-28 16:00:00.000000000 -0800
++++ binutils-new/ld/scripttempl/avr.sc	2024-05-26 10:57:20.557989378 -0700
+@@ -117,6 +117,8 @@
+   signature (rw!x) : ORIGIN = 0x840000, LENGTH = __SIGNATURE_REGION_LENGTH__
+ ${USER_SIGNATURE_LENGTH+  user_signatures (rw!x) : ORIGIN = 0x850000, LENGTH = __USER_SIGNATURE_REGION_LENGTH__}
+ ${HAVE_FLMAP+  rodata (r!x) : ORIGIN = __RODATA_ORIGIN__, LENGTH = __RODATA_REGION_LENGTH__}
++  eh_data (rw!x) : ORIGIN = 0x900000, LENGTH = 5000M 
++  /* This is to get it to stop complaning of eh_frame overflowing from region memory*/
+ }
+ EOF
+ 
+@@ -206,7 +208,6 @@
+     *libc.a:*(.progmem.data)
+ 
+     *(.progmem.*)
+-
+     . = ALIGN(2);
+ 
+     /* For code that needs to reside in the lower 128k progmem.  */
+@@ -282,7 +283,13 @@
+     *(.jumptables)
+     *(.jumptables*)
+ 
+-    _etext = . ;}
++    _etext = .;
++    PROVIDE (__lsda_begin = .) ; 
++    *(.gcc_except_table)
++    *(.gcc_except_table.*)
++    PROVIDE (__fae_table_start = .) ;
++    KEEP(*(.fae_data))
++    PROVIDE (__fae_table_stop = .) ; ;}
+   } ${RELOCATING+ > text}
+ EOF
+ 
+@@ -458,6 +465,7 @@
+ 
+ cat <<EOF
+   .note.gnu.build-id ${RELOCATING-0} : { *(.note.gnu.build-id) }
++  .eh_frame : { KEEP (*(.eh_frame)) } > eh_data
+ EOF
+ 
+ source_sh $srcdir/scripttempl/DWARF.sc

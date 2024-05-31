@@ -1,6 +1,6 @@
-diff --color -ruN gcc/gcc/common/config/avr/avr-common.cc gcc-new/gcc/common/config/avr/avr-common.cc
---- gcc/gcc/common/config/avr/avr-common.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/common/config/avr/avr-common.cc	2024-03-25 14:01:14.818922603 -0700
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/common/config/avr/avr-common.cc gcc-new/gcc/common/config/avr/avr-common.cc
+--- gcc-13.2.0/gcc/common/config/avr/avr-common.cc	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/common/config/avr/avr-common.cc	2024-05-14 13:14:22.087326519 -0700
 @@ -148,6 +148,6 @@
  #define TARGET_OPTION_OPTIMIZATION_TABLE avr_option_optimization_table
  
@@ -9,9 +9,9 @@ diff --color -ruN gcc/gcc/common/config/avr/avr-common.cc gcc-new/gcc/common/con
 +#define TARGET_EXCEPT_UNWIND_INFO dwarf2_except_unwind_info
  
  struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
-diff --color -ruN gcc/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
---- gcc/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr.cc	2024-03-25 14:45:06.992566725 -0700
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
+--- gcc-13.2.0/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr.cc	2024-05-14 13:14:22.087326519 -0700
 @@ -13521,6 +13521,16 @@
    return NULL_TREE;
  }
@@ -29,15 +29,34 @@ diff --color -ruN gcc/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
  
  /* Implement `TARGET_LEGITIMATE_COMBINED_INSN'.  */
  
-diff --color -ruN gcc/gcc/config/avr/avr.h gcc-new/gcc/config/avr/avr.h
---- gcc/gcc/config/avr/avr.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr.h	2024-03-25 14:46:55.662565258 -0700
-@@ -525,6 +525,15 @@
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr.h gcc-new/gcc/config/avr/avr.h
+--- gcc-13.2.0/gcc/config/avr/avr.h	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr.h	2024-05-23 12:51:35.429857279 -0700
+@@ -386,6 +386,8 @@
+    There are no shared libraries on this target, and these sections are
+    placed in the read-only program memory, so they are not writable.  */
+ 
++#define INIT_SECTION_ASM_OP "\t.section\t.init"
++
+ #undef CTORS_SECTION_ASM_OP
+ #define CTORS_SECTION_ASM_OP "\t.section .ctors,\"a\",@progbits"
+ 
+@@ -514,9 +516,6 @@
+   " %:double-lib(%{m*:m%*})"                            \
+   " %:device-specs-file(device-specs%s %{mmcu=*:%*})"
+ 
+-/* No libstdc++ for now.  Empty string doesn't work.  */
+-#define LIBSTDCXX "gcc"
+-
+ /* This is the default without any -mmcu=* option.  */
+ #define MULTILIB_DEFAULTS { "mmcu=" AVR_MMCU_DEFAULT }
+ 
+@@ -525,6 +524,15 @@
  
  #define CR_TAB "\n\t"
  
 +/* Used to define how dwarf exception handling is implemented. */
-+#define EH_RETURN_DATA_REGNO(N) ((N + 18) <= 22 ? (N + 18) : INVALID_REGNUM)
++#define EH_RETURN_DATA_REGNO(N) ((26 - (N+1) * 2) >= 20 ? (26 - (N+1) * 2) : INVALID_REGNUM)
 +#define EH_RETURN_STACKADJ_RTX  gen_rtx_REG (Pmode, 24)
 +  
 +/* This might have to be changed to pcrel if the pointer is not big enough */
@@ -48,9 +67,9 @@ diff --color -ruN gcc/gcc/config/avr/avr.h gcc-new/gcc/config/avr/avr.h
  #define DWARF2_ADDR_SIZE 4
  
  #define INCOMING_RETURN_ADDR_RTX   avr_incoming_return_addr_rtx ()
-diff --color -ruN gcc/gcc/config/avr/avr-protos.h gcc-new/gcc/config/avr/avr-protos.h
---- gcc/gcc/config/avr/avr-protos.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr-protos.h	2024-03-25 14:01:14.818922603 -0700
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr-protos.h gcc-new/gcc/config/avr/avr-protos.h
+--- gcc-13.2.0/gcc/config/avr/avr-protos.h	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/avr-protos.h	2024-05-14 13:14:22.087326519 -0700
 @@ -84,6 +84,7 @@
  
  extern void avr_expand_prologue (void);
@@ -59,3 +78,1529 @@ diff --color -ruN gcc/gcc/config/avr/avr-protos.h gcc-new/gcc/config/avr/avr-pro
  extern bool avr_emit_cpymemhi (rtx*);
  extern int avr_epilogue_uses (int regno);
  
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/elf.h gcc-new/gcc/config/avr/elf.h
+--- gcc-13.2.0/gcc/config/avr/elf.h	2023-07-27 01:13:04.000000000 -0700
++++ gcc-new/gcc/config/avr/elf.h	2024-05-14 13:14:22.087326519 -0700
+@@ -29,5 +29,4 @@
+ #define STRING_LIMIT ((unsigned) 64)
+ 
+ /* Be conservative in crtstuff.c.  */
+-#undef INIT_SECTION_ASM_OP
+-#undef FINI_SECTION_ASM_OP
++
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-dw2.c gcc-new/libgcc/unwind-dw2.c
+--- gcc-13.2.0/libgcc/unwind-dw2.c	2023-07-27 01:13:07.000000000 -0700
++++ gcc-new/libgcc/unwind-dw2.c	2024-05-16 15:58:16.868929896 -0700
+@@ -974,10 +974,6 @@
+ 		     struct _Unwind_Context *context,
+ 		     _Unwind_FrameState *fs)
+ {
+-  if (fs->data_align == __LIBGCC_DWARF_CIE_DATA_ALIGNMENT__
+-      && fs->code_align == 1)
+-    execute_cfa_program_specialized (insn_ptr, insn_end, context, fs);
+-  else
+     execute_cfa_program_generic (insn_ptr, insn_end, context, fs);
+ }
+ 
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-generic.h gcc-new/libgcc/unwind-generic.h
+--- gcc-13.2.0/libgcc/unwind-generic.h	2023-07-27 01:13:07.000000000 -0700
++++ gcc-new/libgcc/unwind-generic.h	2024-05-23 20:03:38.624398808 -0700
+@@ -130,7 +130,7 @@
+ 
+ /* Raise an exception, passing along the given exception object.  */
+ extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
+-_Unwind_RaiseException (struct _Unwind_Exception *);
++_Unwind_RaiseException (struct _Unwind_Exception *) __attribute__((weak));
+ 
+ /* Raise an exception for forced unwinding.  */
+ 
+@@ -138,16 +138,22 @@
+      (int, _Unwind_Action, _Unwind_Exception_Class,
+       struct _Unwind_Exception *, struct _Unwind_Context *, void *);
+ 
+-extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
++ __attribute__((weak)) extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
+ _Unwind_ForcedUnwind (struct _Unwind_Exception *, _Unwind_Stop_Fn, void *);
+ 
+ /* Helper to invoke the exception_cleanup routine.  */
+-extern void _Unwind_DeleteException (struct _Unwind_Exception *);
++inline void
++_Unwind_DeleteException (struct _Unwind_Exception *exc)
++{
++  if (exc->exception_cleanup)
++    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
++}
++
+ 
+ /* Resume propagation of an existing exception.  This is used after
+    e.g. executing cleanup code, and not to implement rethrowing.  */
+ extern void LIBGCC2_UNWIND_ATTRIBUTE
+-_Unwind_Resume (struct _Unwind_Exception *);
++_Unwind_Resume (struct _Unwind_Exception *)  __attribute__((weak));
+ 
+ /* @@@ Resume propagation of a FORCE_UNWIND exception, or to rethrow
+    a normal exception that was handled.  */
+@@ -247,6 +253,10 @@
+    contains it.  */
+ extern void * _Unwind_FindEnclosingFunction (void *pc);
+ 
++#ifndef __SIZEOF_INT__
++  #error "__SIZEOF_INT__ macro not defined"
++#endif
++
+ #ifndef __SIZEOF_LONG__
+   #error "__SIZEOF_LONG__ macro not defined"
+ #endif
+@@ -256,6 +266,7 @@
+ #endif
+ 
+ 
++
+ /* leb128 type numbers have a potentially unlimited size.
+    The target of the following definitions of _sleb128_t and _uleb128_t
+    is to have efficient data types large enough to hold the leb128 type
+@@ -264,7 +275,10 @@
+    except when a unsigned long data type on the target machine is not
+    capable of storing a pointer.  */
+ 
+-#if __SIZEOF_LONG__ >= __SIZEOF_POINTER__
++#if __SIZEOF_INT__ >= __SIZEOF_POINTER__
++  typedef int _sleb128_t;
++  typedef unsigned int _uleb128_t;
++#elif __SIZEOF_LONG__ >= __SIZEOF_POINTER__
+   typedef long _sleb128_t;
+   typedef unsigned long _uleb128_t;
+ #elif __SIZEOF_LONG_LONG__ >= __SIZEOF_POINTER__
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind.inc gcc-new/libgcc/unwind.inc
+--- gcc-13.2.0/libgcc/unwind.inc	2023-07-27 01:13:07.000000000 -0700
++++ gcc-new/libgcc/unwind.inc	2024-05-23 20:03:46.894396397 -0700
+@@ -82,8 +82,8 @@
+ 
+ /* Raise an exception, passing along the given exception object.  */
+ 
+-_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
+-_Unwind_RaiseException(struct _Unwind_Exception *exc)
++_Unwind_Reason_Code  LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
++_Unwind_RaiseException(struct _Unwind_Exception *exc) 
+ {
+   struct _Unwind_Context this_context, cur_context;
+   _Unwind_Reason_Code code;
+@@ -201,7 +201,7 @@
+ 
+ /* Raise an exception for forced unwinding.  */
+ 
+-_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
++_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
+ _Unwind_ForcedUnwind (struct _Unwind_Exception *exc,
+ 		      _Unwind_Stop_Fn stop, void * stop_argument)
+ {
+@@ -226,7 +226,7 @@
+ /* Resume propagation of an existing exception.  This is used after
+    e.g. executing cleanup code, and not to implement rethrowing.  */
+ 
+-void LIBGCC2_UNWIND_ATTRIBUTE
++void LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
+ _Unwind_Resume (struct _Unwind_Exception *exc)
+ {
+   struct _Unwind_Context this_context, cur_context;
+@@ -252,7 +252,7 @@
+ /* Resume propagation of an FORCE_UNWIND exception, or to rethrow
+    a normal exception that was handled.  */
+ 
+-_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
++_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
+ _Unwind_Resume_or_Rethrow (struct _Unwind_Exception *exc)
+ {
+   struct _Unwind_Context this_context, cur_context;
+@@ -275,16 +275,6 @@
+ }
+ 
+ 
+-/* A convenience function that calls the exception_cleanup field.  */
+-
+-void
+-_Unwind_DeleteException (struct _Unwind_Exception *exc)
+-{
+-  if (exc->exception_cleanup)
+-    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
+-}
+-
+-
+ /* Perform stack backtrace through unwind data.  */
+ 
+ _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-seh.c gcc-new/libgcc/unwind-seh.c
+--- gcc-13.2.0/libgcc/unwind-seh.c	2023-07-27 01:13:07.000000000 -0700
++++ gcc-new/libgcc/unwind-seh.c	2024-05-23 20:04:29.304384262 -0700
+@@ -419,14 +419,6 @@
+   return _Unwind_ForcedUnwind_Phase2 (exc);
+ }
+ 
+-/* A convenience function that calls the exception_cleanup field.  */
+-
+-void
+-_Unwind_DeleteException (struct _Unwind_Exception *exc)
+-{
+-  if (exc->exception_cleanup)
+-    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
+-}
+ 
+ /* Perform stack backtrace through unwind data.  */
+ 
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h gcc-new/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	2024-05-25 14:00:44.077691243 -0700
+@@ -0,0 +1,44 @@
++// Low-level functions for atomic operations: version for CPUs providing
++// atomic builtins -*- C++ -*-
++
++// Copyright (C) 2006-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++#include <bits/c++config.h>
++#include <bits/atomic_word.h>
++
++namespace __gnu_cxx _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++  _Atomic_word
++  __attribute__ ((__unused__))
++  __exchange_and_add(volatile _Atomic_word* __mem, int __val) throw ()
++  { return __atomic_fetch_add(__mem, __val, __ATOMIC_ACQ_REL); }
++
++  void
++  __attribute__ ((__unused__))
++  __atomic_add(volatile _Atomic_word* __mem, int __val) throw ()
++  { __atomic_fetch_add(__mem, __val, __ATOMIC_ACQ_REL); }
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h gcc-new/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	2024-05-25 14:00:44.077691243 -0700
+@@ -0,0 +1,59 @@
++// Low-level functions for atomic operations: Generic version  -*- C++ -*-
++
++// Copyright (C) 1999-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++#include <ext/atomicity.h>
++#include <ext/concurrence.h>
++
++namespace
++{
++  __gnu_cxx::__mutex&
++  get_atomic_mutex()
++  {
++    static __gnu_cxx::__mutex atomic_mutex;
++    return atomic_mutex;
++  }
++} // anonymous namespace
++
++namespace __gnu_cxx _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++  _Atomic_word
++  __attribute__ ((__unused__))
++  __exchange_and_add(volatile _Atomic_word* __mem, int __val) throw ()
++  {
++    __gnu_cxx::__scoped_lock sentry(get_atomic_mutex());
++    _Atomic_word __result;
++    __result = *__mem;
++    *__mem += __val;
++    return __result;
++  }
++
++  void
++  __attribute__ ((__unused__))
++  __atomic_add(volatile _Atomic_word* __mem, int __val) throw ()
++  { __exchange_and_add(__mem, __val); }
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h gcc-new/libstdc++-v3/config/cpu/avr/atomic_word.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/atomic_word.h	2024-05-25 14:00:44.067691244 -0700
+@@ -0,0 +1,40 @@
++// Low-level type for atomic operations -*- C++ -*-
++
++// Copyright (C) 2004-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file atomic_word.h
++ *  This file is a GNU extension to the Standard C++ Library.
++ */
++
++#ifndef _GLIBCXX_ATOMIC_WORD_H
++#define _GLIBCXX_ATOMIC_WORD_H	1
++
++typedef int _Atomic_word;
++
++
++// This is a memory order acquire fence.
++#define _GLIBCXX_READ_MEM_BARRIER __atomic_thread_fence (__ATOMIC_ACQUIRE)
++// This is a memory order release fence.
++#define _GLIBCXX_WRITE_MEM_BARRIER __atomic_thread_fence (__ATOMIC_RELEASE)
++
++#endif
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h gcc-new/libstdc++-v3/config/cpu/avr/cpu_defines.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/cpu_defines.h	2024-05-25 14:00:44.067691244 -0700
+@@ -0,0 +1,33 @@
++// Specific definitions for generic platforms  -*- C++ -*-
++
++// Copyright (C) 2005-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/cpu_defines.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{iosfwd}
++ */
++
++#ifndef _GLIBCXX_CPU_DEFINES
++#define _GLIBCXX_CPU_DEFINES 1
++
++#endif
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h gcc-new/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	2024-05-25 14:00:44.067691244 -0700
+@@ -0,0 +1,59 @@
++// Control various target specific ABI tweaks.  Generic version.
++
++// Copyright (C) 2004-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/cxxabi_tweaks.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{cxxabi.h}
++ */
++
++#ifndef _CXXABI_TWEAKS_H
++#define _CXXABI_TWEAKS_H 1
++
++#ifdef __cplusplus
++namespace __cxxabiv1
++{
++  extern "C"
++  {
++#endif
++
++  // The generic ABI uses the first byte of a 64-bit guard variable.
++#define _GLIBCXX_GUARD_TEST(x) (*(char *) (x) != 0)
++#define _GLIBCXX_GUARD_SET(x) *(char *) (x) = 1
++#define _GLIBCXX_GUARD_BIT __guard_test_bit (0, 1)
++#define _GLIBCXX_GUARD_PENDING_BIT __guard_test_bit (1, 1)
++#define _GLIBCXX_GUARD_WAITING_BIT __guard_test_bit (2, 1)
++  __extension__ typedef int __guard __attribute__((mode (__DI__)));
++
++  // __cxa_vec_ctor has void return type.
++  typedef void __cxa_vec_ctor_return_type;
++#define _GLIBCXX_CXA_VEC_CTOR_RETURN(x) return
++  // Constructors and destructors do not return a value.
++  typedef void __cxa_cdtor_return_type;
++
++#ifdef __cplusplus
++  }
++} // namespace __cxxabiv1
++#endif
++
++#endif
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h gcc-new/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	2024-05-25 14:00:44.077691243 -0700
+@@ -0,0 +1,38 @@
++// Optimizations for random number handling, generic version -*- C++ -*-
++
++// Copyright (C) 2012-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/opt_random.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{random}
++ */
++
++#ifndef _BITS_OPT_RANDOM_H
++#define _BITS_OPT_RANDOM_H 1
++
++#pragma GCC system_header
++
++
++
++
++#endif // _BITS_OPT_RANDOM_H
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h gcc-new/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
+--- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	2024-05-25 14:00:44.077691243 -0700
+@@ -0,0 +1,38 @@
++// Optimizations for random number extensions, generic version -*- C++ -*-
++
++// Copyright (C) 2012-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file ext/opt_random.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{ext/random}
++ */
++
++#ifndef _EXT_OPT_RANDOM_H
++#define _EXT_OPT_RANDOM_H 1
++
++#pragma GCC system_header
++
++
++
++
++#endif // _EXT_OPT_RANDOM_H
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h gcc-new/libstdc++-v3/config/os/avrlibc/ctype_base.h
+--- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_base.h	2024-05-25 11:27:05.784778219 -0700
+@@ -0,0 +1,59 @@
++// Locale support -*- C++ -*-
++
++// Copyright (C) 1997-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++//
++// ISO C++ 14882: 22.1  Locales
++//
++
++// Default information, may not be appropriate for specific host.
++
++namespace std _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++  /// @brief  Base class for ctype.
++  struct ctype_base
++  {
++    // Non-standard typedefs.
++    typedef const int* 		__to_type;
++
++    // NB: Offsets into ctype<char>::_M_table force a particular size
++    // on the mask type. Because of this, we don't use an enum.
++    typedef unsigned int 	mask;
++    static const mask upper    	= 1 << 0;
++    static const mask lower 	= 1 << 1;
++    static const mask alpha 	= 1 << 2;
++    static const mask digit 	= 1 << 3;
++    static const mask xdigit 	= 1 << 4;
++    static const mask space 	= 1 << 5;
++    static const mask print 	= 1 << 6;
++    static const mask graph 	= (1 << 2) | (1 << 3) | (1 << 9); // alnum|punct
++    static const mask cntrl 	= 1 << 8;
++    static const mask punct 	= 1 << 9;
++    static const mask alnum 	= (1 << 2) | (1 << 3);  // alpha|digit
++    static const mask blank	= 1 << 10;
++  };
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc gcc-new/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
+--- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	2024-05-25 11:27:05.784778219 -0700
+@@ -0,0 +1,99 @@
++// Locale support -*- C++ -*-
++
++// Copyright (C) 2011-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file ctype_configure_char.cc */
++
++//
++// ISO C++ 14882: 22.1  Locales
++//
++
++#include <locale>
++#include <cstdlib>
++#include <cstring>
++
++namespace std _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++// Information as gleaned from /usr/include/ctype.h
++
++  const ctype_base::mask*
++  ctype<char>::classic_table() throw()
++  { return 0; }
++
++  ctype<char>::ctype(__c_locale, const mask* __table, bool __del,
++		     size_t __refs)
++  : facet(__refs), _M_del(__table != 0 && __del),
++  _M_toupper(NULL), _M_tolower(NULL),
++  _M_table(__table ? __table : classic_table())
++  {
++    memset(_M_widen, 0, sizeof(_M_widen));
++    _M_widen_ok = 0;
++    memset(_M_narrow, 0, sizeof(_M_narrow));
++    _M_narrow_ok = 0;
++  }
++
++  ctype<char>::ctype(const mask* __table, bool __del, size_t __refs)
++  : facet(__refs), _M_del(__table != 0 && __del),
++  _M_toupper(NULL), _M_tolower(NULL),
++  _M_table(__table ? __table : classic_table())
++  {
++    memset(_M_widen, 0, sizeof(_M_widen));
++    _M_widen_ok = 0;
++    memset(_M_narrow, 0, sizeof(_M_narrow));
++    _M_narrow_ok = 0;
++  }
++
++  char
++  ctype<char>::do_toupper(char __c) const
++  { return ::toupper((int) __c); }
++
++  const char*
++  ctype<char>::do_toupper(char* __low, const char* __high) const
++  {
++    while (__low < __high)
++      {
++	*__low = ::toupper((int) *__low);
++	++__low;
++      }
++    return __high;
++  }
++
++  char
++  ctype<char>::do_tolower(char __c) const
++  { return ::tolower((int) __c); }
++
++  const char*
++  ctype<char>::do_tolower(char* __low, const char* __high) const
++  {
++    while (__low < __high)
++      {
++	*__low = ::tolower((int) *__low);
++	++__low;
++      }
++    return __high;
++  }
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h gcc-new/libstdc++-v3/config/os/avrlibc/ctype_inline.h
+--- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_inline.h	2024-05-25 11:27:05.784778219 -0700
+@@ -0,0 +1,173 @@
++// Locale support -*- C++ -*-
++
++// Copyright (C) 2000-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/ctype_inline.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{locale}
++ */
++
++//
++// ISO C++ 14882: 22.1  Locales
++//
++
++// ctype bits to be inlined go here. Non-inlinable (ie virtual do_*)
++// functions go in ctype.cc
++
++// The following definitions are portable, but insanely slow. If one
++// cares at all about performance, then specialized ctype
++// functionality should be added for the native os in question: see
++// the config/os/bits/ctype_*.h files.
++
++// Constructing a synthetic "C" table should be seriously considered...
++
++namespace std _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++  bool
++  ctype<char>::
++  is(mask __m, char __c) const
++  {
++    if (_M_table)
++      return _M_table[static_cast<unsigned char>(__c)] & __m;
++    else
++      {
++	bool __ret = false;
++	const size_t __bitmasksize = 15;
++	size_t __bitcur = 0; // Lowest bitmask in ctype_base == 0
++	for (; __bitcur <= __bitmasksize; ++__bitcur)
++	  {
++	    const mask __bit = static_cast<mask>(1 << __bitcur);
++	    if (__m & __bit)
++	      {
++		bool __testis;
++		switch (__bit)
++		  {
++		  case space:
++		    __testis = isspace(__c);
++		    break;
++		  case print:
++		    __testis = isprint(__c);
++		    break;
++		  case cntrl:
++		    __testis = iscntrl(__c);
++		    break;
++		  case upper:
++		    __testis = isupper(__c);
++		    break;
++		  case lower:
++		    __testis = islower(__c);
++		    break;
++		  case alpha:
++		    __testis = isalpha(__c);
++		    break;
++		  case digit:
++		    __testis = isdigit(__c);
++		    break;
++		  case punct:
++		    __testis = ispunct(__c);
++		    break;
++		  case xdigit:
++		    __testis = isxdigit(__c);
++		    break;
++		  case alnum:
++		    __testis = isalnum(__c);
++		    break;
++		  case graph:
++		    __testis = isgraph(__c);
++		    break;
++#ifdef _GLIBCXX_USE_C99_CTYPE_TR1
++		  case blank:
++		    __testis = isblank(__c);
++		    break;
++#endif
++		  default:
++		    __testis = false;
++		    break;
++		  }
++		__ret |= __testis;
++	      }
++	  }
++	return __ret;
++      }
++  }
++
++  const char*
++  ctype<char>::
++  is(const char* __low, const char* __high, mask* __vec) const
++  {
++    if (_M_table)
++      while (__low < __high)
++	*__vec++ = _M_table[static_cast<unsigned char>(*__low++)];
++    else
++      {
++	// Highest bitmask in ctype_base == 11.
++	const size_t __bitmasksize = 15;
++	for (;__low < __high; ++__vec, ++__low)
++	  {
++	    mask __m = 0;
++	    // Lowest bitmask in ctype_base == 0
++	    size_t __i = 0;
++	    for (;__i <= __bitmasksize; ++__i)
++	      {
++		const mask __bit = static_cast<mask>(1 << __i);
++		if (this->is(__bit, *__low))
++		  __m |= __bit;
++	      }
++	    *__vec = __m;
++	  }
++      }
++    return __high;
++  }
++
++  const char*
++  ctype<char>::
++  scan_is(mask __m, const char* __low, const char* __high) const
++  {
++    if (_M_table)
++      while (__low < __high
++	     && !(_M_table[static_cast<unsigned char>(*__low)] & __m))
++	++__low;
++    else
++      while (__low < __high && !this->is(__m, *__low))
++	++__low;
++    return __low;
++  }
++
++  const char*
++  ctype<char>::
++  scan_not(mask __m, const char* __low, const char* __high) const
++  {
++    if (_M_table)
++      while (__low < __high
++	     && (_M_table[static_cast<unsigned char>(*__low)] & __m) != 0)
++	++__low;
++    else
++      while (__low < __high && this->is(__m, *__low) != 0)
++	++__low;
++    return __low;
++  }
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h gcc-new/libstdc++-v3/config/os/avrlibc/error_constants.h
+--- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/os/avrlibc/error_constants.h	2024-05-25 11:27:05.784778219 -0700
+@@ -0,0 +1,180 @@
++// Specific definitions for generic platforms  -*- C++ -*-
++
++// Copyright (C) 2007-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/error_constants.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{system_error}
++ */
++
++#ifndef _GLIBCXX_ERROR_CONSTANTS
++#define _GLIBCXX_ERROR_CONSTANTS 1
++
++#include <bits/c++config.h>
++#include <cerrno>
++
++namespace std _GLIBCXX_VISIBILITY(default)
++{
++_GLIBCXX_BEGIN_NAMESPACE_VERSION
++
++  enum class errc
++    {
++      address_family_not_supported = 		EAFNOSUPPORT,
++      address_in_use = 				EADDRINUSE,
++      address_not_available = 			EADDRNOTAVAIL,
++      already_connected = 			EISCONN,
++      argument_list_too_long = 			E2BIG,
++      argument_out_of_domain = 			EDOM,
++      bad_address = 				EFAULT,
++      bad_file_descriptor = 			EBADF,
++
++#ifdef EBADMSG
++      bad_message = 				EBADMSG,
++#endif
++
++      broken_pipe = 				EPIPE,
++      connection_aborted = 			ECONNABORTED,
++      connection_already_in_progress = 		EALREADY,
++      connection_refused = 			ECONNREFUSED,
++      connection_reset = 			ECONNRESET,
++      cross_device_link = 			EXDEV,
++      destination_address_required = 		EDESTADDRREQ,
++      device_or_resource_busy = 		EBUSY,
++      directory_not_empty = 			ENOTEMPTY,
++      executable_format_error = 		ENOEXEC,
++      file_exists = 	       			EEXIST,
++      file_too_large = 				EFBIG,
++      filename_too_long = 			ENAMETOOLONG,
++      function_not_supported = 			ENOSYS,
++      host_unreachable = 			EHOSTUNREACH,
++
++#ifdef EIDRM
++      identifier_removed = 			EIDRM,
++#endif
++
++      illegal_byte_sequence = 			EILSEQ,
++      inappropriate_io_control_operation = 	ENOTTY,
++      interrupted = 				EINTR,
++      invalid_argument = 			EINVAL,
++      invalid_seek = 				ESPIPE,
++      io_error = 				EIO,
++      is_a_directory = 				EISDIR,
++      message_size = 				EMSGSIZE,
++      network_down = 				ENETDOWN,
++      network_reset = 				ENETRESET,
++      network_unreachable = 			ENETUNREACH,
++      no_buffer_space = 			ENOBUFS,
++      no_child_process = 			ECHILD,
++
++#ifdef ENOLINK
++      no_link = 				ENOLINK,
++#endif
++
++      no_lock_available = 			ENOLCK,
++
++#ifdef ENODATA
++      no_message_available = 			ENODATA,
++#endif
++
++      no_message = 				ENOMSG,
++      no_protocol_option = 			ENOPROTOOPT,
++      no_space_on_device = 			ENOSPC,
++
++#ifdef ENOSR
++      no_stream_resources = 			ENOSR,
++#endif
++
++      no_such_device_or_address = 		ENXIO,
++      no_such_device = 				ENODEV,
++      no_such_file_or_directory = 		ENOENT,
++      no_such_process = 			ESRCH,
++      not_a_directory = 			ENOTDIR,
++      not_a_socket = 				ENOTSOCK,
++
++#ifdef ENOSTR
++      not_a_stream = 				ENOSTR,
++#endif
++
++      not_connected = 				ENOTCONN,
++      not_enough_memory = 			ENOMEM,
++
++#ifdef ENOTSUP
++      not_supported = 				ENOTSUP,
++#endif
++
++#ifdef ECANCELED
++      operation_canceled = 			ECANCELED,
++#endif
++
++      operation_in_progress = 			EINPROGRESS,
++      operation_not_permitted = 		EPERM,
++      operation_not_supported = 		EOPNOTSUPP,
++      operation_would_block = 			EWOULDBLOCK,
++
++#ifdef EOWNERDEAD
++      owner_dead = 				EOWNERDEAD,
++#endif
++
++      permission_denied = 			EACCES,
++
++#ifdef EPROTO
++      protocol_error = 				EPROTO,
++#endif
++
++      protocol_not_supported = 			EPROTONOSUPPORT,
++      read_only_file_system = 			EROFS,
++      resource_deadlock_would_occur = 		EDEADLK,
++      resource_unavailable_try_again = 		EAGAIN,
++      result_out_of_range = 			ERANGE,
++
++#ifdef ENOTRECOVERABLE
++      state_not_recoverable = 			ENOTRECOVERABLE,
++#endif
++
++#ifdef ETIME
++      stream_timeout = 				ETIME,
++#endif
++
++#ifdef ETXTBSY
++      text_file_busy = 				ETXTBSY,
++#endif
++
++      timed_out = 				ETIMEDOUT,
++      too_many_files_open_in_system = 		ENFILE,
++      too_many_files_open = 			EMFILE,
++      too_many_links = 				EMLINK,
++      too_many_symbolic_link_levels = 		ELOOP,
++
++#ifdef EOVERFLOW
++      value_too_large = 			EOVERFLOW,
++#elif defined __AVR__
++      value_too_large = 			999,
++#endif
++
++      wrong_protocol_type = 			EPROTOTYPE
++    };
++
++_GLIBCXX_END_NAMESPACE_VERSION
++} // namespace
++
++#endif
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h gcc-new/libstdc++-v3/config/os/avrlibc/os_defines.h
+--- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h	1969-12-31 16:00:00.000000000 -0800
++++ gcc-new/libstdc++-v3/config/os/avrlibc/os_defines.h	2024-05-25 11:27:05.784778219 -0700
+@@ -0,0 +1,41 @@
++// Specific definitions for generic platforms  -*- C++ -*-
++
++// Copyright (C) 2000-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
++
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
++
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
++
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
++
++/** @file bits/os_defines.h
++ *  This is an internal header file, included by other library headers.
++ *  Do not attempt to use it directly. @headername{iosfwd}
++ */
++
++#ifndef _GLIBCXX_OS_DEFINES
++#define _GLIBCXX_OS_DEFINES 1
++
++// System-specific #define, typedefs, corrections, etc, go here.  This
++// file will come before all others.
++
++// Disable the weak reference logic in gthr.h for os/generic because it
++// is broken on every platform unless there is implementation specific
++// workaround in gthr-posix.h and at link-time for static linking.
++#define _GLIBCXX_GTHREAD_USE_WEAK 0
++
++#endif
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc gcc-new/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
+--- gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2023-07-27 01:13:08.000000000 -0700
++++ gcc-new/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2024-05-25 11:21:25.844753989 -0700
+@@ -40,7 +40,7 @@
+ 
+   const ctype_base::mask*
+   ctype<char>::classic_table() throw()
+-  { return _ctype_ + 1; }
++  { return 0; }
+ 
+   ctype<char>::ctype(__c_locale, const mask* __table, bool __del,
+ 		     size_t __refs)
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/crossconfig.m4 gcc-new/libstdc++-v3/crossconfig.m4
+--- gcc-13.2.0/libstdc++-v3/crossconfig.m4	2023-07-27 01:13:08.000000000 -0700
++++ gcc-new/libstdc++-v3/crossconfig.m4	2024-05-25 11:23:13.494759022 -0700
+@@ -33,6 +33,29 @@
+     AC_DEFINE(HAVE_SINHF)
+     AC_DEFINE(HAVE_TANF)
+     AC_DEFINE(HAVE_TANHF)
++    AC_DEFINE(HAVE_ACOSL)
++    AC_DEFINE(HAVE_ASINL)
++    AC_DEFINE(HAVE_ATAN2L)
++    AC_DEFINE(HAVE_ATANL)
++    AC_DEFINE(HAVE_CEILL)
++    AC_DEFINE(HAVE_COSL)
++    AC_DEFINE(HAVE_COSHL)
++    AC_DEFINE(HAVE_EXPL)
++    AC_DEFINE(HAVE_FABSL)
++    AC_DEFINE(HAVE_FLOORL)
++    AC_DEFINE(HAVE_FMODL)
++    AC_DEFINE(HAVE_FREXPL)
++    AC_DEFINE(HAVE_LDEXPL)
++    AC_DEFINE(HAVE_LOG10L)
++    AC_DEFINE(HAVE_LOGL)
++    AC_DEFINE(HAVE_MODFL)
++    AC_DEFINE(HAVE_POWL)
++    AC_DEFINE(HAVE_SINCOSL)
++    AC_DEFINE(HAVE_SINL)
++    AC_DEFINE(HAVE_SINHL)
++    AC_DEFINE(HAVE_SQRTL)
++    AC_DEFINE(HAVE_TANL)
++    AC_DEFINE(HAVE_TANHL)
+     ;;
+ 
+   mips*-sde-elf*)
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc gcc-new/libstdc++-v3/libsupc++/eh_personality.cc
+--- gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc	2023-07-27 01:13:08.000000000 -0700
++++ gcc-new/libstdc++-v3/libsupc++/eh_personality.cc	2024-05-22 16:04:22.081948787 -0700
+@@ -356,6 +356,7 @@
+ 		      struct _Unwind_Exception* ue_header,
+ 		      struct _Unwind_Context* context)
+ #else
++__attribute__((weak))
+ PERSONALITY_FUNCTION (int version,
+ 		      _Unwind_Action actions,
+ 		      _Unwind_Exception_Class exception_class,
+diff -ruN '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc gcc-new/libstdc++-v3/src/c++98/math_stubs_long_double.cc
+--- gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2023-07-27 01:13:08.000000000 -0700
++++ gcc-new/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2024-05-25 14:06:09.387714200 -0700
+@@ -30,195 +30,195 @@
+ 
+ extern "C"
+ {
+-#ifndef _GLIBCXX_HAVE_FABSL
+-  long double
+-  fabsl(long double x)
+-  {
+-    return fabs((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_ACOSL
+-  long double
+-  acosl(long double x)
+-  {
+-    return acos((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_ASINL
+-  long double
+-  asinl(long double x)
+-  {
+-    return asin((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_ATANL
+-  long double
+-  atanl(long double x)
+-  {
+-    return atan ((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_ATAN2L
+-  long double
+-  atan2l(long double x, long double y)
+-  {
+-    return atan2((double) x, (double) y);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_CEILL
+-  long double
+-  ceill(long double x)
+-  {
+-    return ceil((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_COSL
+-  long double
+-  cosl(long double x)
+-  {
+-    return cos((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_COSHL
+-  long double
+-  coshl(long double x)
+-  {
+-    return cosh((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_EXPL
+-  long double
+-  expl(long double x)
+-  {
+-    return exp((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_FLOORL
+-  long double
+-  floorl(long double x)
+-  {
+-    return floor((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_FMODL
+-  long double
+-  fmodl(long double x, long double y)
+-  {
+-    return fmod((double) x, (double) y);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_FREXPL
+-  long double
+-  frexpl(long double x, int *exp)
+-  {
+-    return frexp((double) x, exp);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_SQRTL
+-  long double
+-  sqrtl(long double x)
+-  {
+-    return  sqrt((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_HYPOTL
+-  long double
+-  hypotl(long double x, long double y)
+-  {
+-    long double s = fabsl(x) + fabsl(y);
+-    if (s == 0.0L)
+-      return s;
+-    x /= s; y /= s;
+-    return s * sqrtl(x * x + y * y);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_LDEXPL
+-  long double
+-  ldexpl(long double x, int exp)
+-  {
+-    return ldexp((double) x, exp);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_LOGL
+-  long double
+-  logl(long double x)
+-  {
+-    return log((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_LOG10L
+-  long double
+-  log10l(long double x)
+-  {
+-    return log10((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_MODFL
+-  long double
+-  modfl(long double x, long double *iptr)
+-  {
+-    double result, temp;
+-
+-    result = modf((double) x, &temp);
+-    *iptr = temp;
+-    return result;
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_POWL
+-  long double
+-  powl(long double x, long double y)
+-  {
+-    return pow((double) x, (double) y);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_SINL
+-  long double
+-  sinl(long double x)
+-  {
+-    return sin((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_SINHL
+-  long double
+-  sinhl(long double x)
+-  {
+-    return sinh((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_TANL
+-  long double
+-  tanl(long double x)
+-  {
+-    return tan((double) x);
+-  }
+-#endif
+-
+-#ifndef _GLIBCXX_HAVE_TANHL
+-  long double
+-  tanhl(long double x)
+-  {
+-    return tanh((double) x);
+-  }
+-#endif
++// #ifndef _GLIBCXX_HAVE_FABSL
++//   long double
++//   fabsl(long double x)
++//   {
++//     return fabs((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_ACOSL
++//   long double
++//   acosl(long double x)
++//   {
++//     return acos((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_ASINL
++//   long double
++//   asinl(long double x)
++//   {
++//     return asin((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_ATANL
++//   long double
++//   atanl(long double x)
++//   {
++//     return atan ((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_ATAN2L
++//   long double
++//   atan2l(long double x, long double y)
++//   {
++//     return atan2((double) x, (double) y);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_CEILL
++//   long double
++//   ceill(long double x)
++//   {
++//     return ceil((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_COSL
++//   long double
++//   cosl(long double x)
++//   {
++//     return cos((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_COSHL
++//   long double
++//   coshl(long double x)
++//   {
++//     return cosh((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_EXPL
++//   long double
++//   expl(long double x)
++//   {
++//     return exp((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_FLOORL
++//   long double
++//   floorl(long double x)
++//   {
++//     return floor((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_FMODL
++//   long double
++//   fmodl(long double x, long double y)
++//   {
++//     return fmod((double) x, (double) y);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_FREXPL
++//   long double
++//   frexpl(long double x, int *exp)
++//   {
++//     return frexp((double) x, exp);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_SQRTL
++//   long double
++//   sqrtl(long double x)
++//   {
++//     return  sqrt((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_HYPOTL
++//   long double
++//   hypotl(long double x, long double y)
++//   {
++//     long double s = fabsl(x) + fabsl(y);
++//     if (s == 0.0L)
++//       return s;
++//     x /= s; y /= s;
++//     return s * sqrtl(x * x + y * y);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_LDEXPL
++//   long double
++//   ldexpl(long double x, int exp)
++//   {
++//     return ldexp((double) x, exp);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_LOGL
++//   long double
++//   logl(long double x)
++//   {
++//     return log((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_LOG10L
++//   long double
++//   log10l(long double x)
++//   {
++//     return log10((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_MODFL
++//   long double
++//   modfl(long double x, long double *iptr)
++//   {
++//     double result, temp;
++
++//     result = modf((double) x, &temp);
++//     *iptr = temp;
++//     return result;
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_POWL
++//   long double
++//   powl(long double x, long double y)
++//   {
++//     return pow((double) x, (double) y);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_SINL
++//   long double
++//   sinl(long double x)
++//   {
++//     return sin((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_SINHL
++//   long double
++//   sinhl(long double x)
++//   {
++//     return sinh((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_TANL
++//   long double
++//   tanl(long double x)
++//   {
++//     return tan((double) x);
++//   }
++// #endif
++
++// #ifndef _GLIBCXX_HAVE_TANHL
++//   long double
++//   tanhl(long double x)
++//   {
++//     return tanh((double) x);
++//   }
++// #endif
+ } // extern "C"

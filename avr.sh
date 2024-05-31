@@ -9,15 +9,16 @@ PREFIX="$1"
 
 confbuild()
 {
-cd $1
-mkdir -p obj
-cd obj
-../configure $2
-make -j8
-make install
-cd ../..
+mkdir -p "$HOST-build-$1"
+cd "$HOST-build-$1"
+../$1/configure $2
+make -j -l 4
+make install -j -l 4
+cd ..
 }
 
+export CFLAGS='-fexceptions -Oz -ffunction-sections -fdata-sections'
+export CXXFLAGS='-fexceptions -frtti -Oz -ffunction-sections -fdata-sections'
 
 if [ -n "$HOSTFLAG" ]; then
 ARGS="$HOSTFLAG --prefix=/usr/$HOST --enable-static --disable-shared"
@@ -26,7 +27,7 @@ confbuild mpfr "$ARGS"
 confbuild mpc "$ARGS"
 fi
 
-confbuild binutils "--disable-bootstrap --prefix=$PREFIX --target=avr $HOSTFLAG --disable-nls"
+confbuild binutils "--prefix=$PREFIX --target=avr $HOSTFLAG"
 export PATH=$PREFIX/bin:$PATH
 
 # win build is always expected to happen after unix build, where unix build already has built avr-gcc
@@ -47,11 +48,10 @@ export CC="$TMPC"
 export CXX="$TMPCXX"
 
 
-confbuild gcc "--prefix=$PREFIX --target=avr $HOSTFLAG --enable-languages=c,c++ --disable-nls \
-  --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --with-newlib --disable-__cxa_atexit \
-  --disable-threads --disable-shared --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool \
-  --program-prefix=avr- --enable-c-flags='-fexceptions' \
-  --disable-hosted-libstdcxx --with-specs=%{!frtti:%{!frtti:-frtti}}% --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
-
-cd avr-libstdcpp
-./inject.sh $PREFIX/avr/include/c++/13.2.0/
+confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
+  --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions \
+  --with-dwarf2 --with-avrlibc --disable-__cxa_atexit  --disable-threads --disable-shared \
+  --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool  \
+ --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 \
+ --with-specs=%{!frtti:%{!frtti:-frtti}} \
+ --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
