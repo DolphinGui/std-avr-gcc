@@ -19,7 +19,7 @@ class AvrGnuToolchain(ConanFile):
     exports_sources = "toolchain.cmake"
     package_type = "application"
     major=0
-    minor=5
+    minor=6
     patch=0
     version = f"{major}.{minor}.{patch}"
 
@@ -29,7 +29,7 @@ class AvrGnuToolchain(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
-        supported_build_operating_systems = ["Linux", "Windows"]
+        supported_build_operating_systems = ["Linux"]
         if not self._settings_build.os in supported_build_operating_systems:
             raise ConanInvalidConfiguration(
                 f"The build os '{self._settings_build.os}' is not supported. "
@@ -38,7 +38,7 @@ class AvrGnuToolchain(ConanFile):
             )
 
         supported_build_architectures = {
-            "Linux": ["x86_64"]
+            "Linux": ["x86_64"],
         }
 
         if (
@@ -82,7 +82,7 @@ class AvrGnuToolchain(ConanFile):
         self.output.info("Creating CC env var with: " + cc)
         self.buildenv_info.define("CC", cc)
 
-        cxx = os.path.join(bindir, 'avr-g++')
+        cxx = os.path.join(bindir, 'avr-g++.sh')
         self.output.info("Creating CXX env var with: " + cxx)
         self.buildenv_info.define("CXX", cxx)
 
@@ -90,17 +90,19 @@ class AvrGnuToolchain(ConanFile):
         self.output.info("Creating AR env var with: " + ar)
         self.buildenv_info.define("AR", ar)
 
-        nm = os.path.join(bindir, f"avr-gcc-nm")
+        nm = os.path.join(bindir, "avr-gcc-nm")
         self.output.info("Creating NM env var with: " + nm)
         self.buildenv_info.define("NM", nm)
 
-        ranlib = os.path.join(bindir, f"avr-gcc-ranlib")
+        ranlib = os.path.join(bindir, "avr-gcc-ranlib")
         self.output.info("Creating RANLIB env var with: " + ranlib)
         self.buildenv_info.define("RANLIB", ranlib)
 
         strip = os.path.join(bindir, "avr-strip")
         self.output.info("Creating STRIP env var with: " + strip)
         self.buildenv_info.define("STRIP", strip)
+        
+        self.buildenv_info.define("LDFLAGS", "-lfae")
 
         # TODO: Remove after conan 2.0 is released
         self.env_info.CC = cc
