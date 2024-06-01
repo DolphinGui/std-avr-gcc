@@ -20,7 +20,7 @@ class AvrGnuToolchain(ConanFile):
     package_type = "application"
     major=0
     minor=6
-    patch=0
+    patch=1
     version = f"{major}.{minor}.{patch}"
 
 
@@ -29,7 +29,7 @@ class AvrGnuToolchain(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def validate(self):
-        supported_build_operating_systems = ["Linux"]
+        supported_build_operating_systems = ["Linux", "Windows"]
         if not self._settings_build.os in supported_build_operating_systems:
             raise ConanInvalidConfiguration(
                 f"The build os '{self._settings_build.os}' is not supported. "
@@ -39,6 +39,7 @@ class AvrGnuToolchain(ConanFile):
 
         supported_build_architectures = {
             "Linux": ["x86_64"],
+            "Windows": ["x86_64"]
         }
 
         if (
@@ -78,27 +79,35 @@ class AvrGnuToolchain(ConanFile):
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
 
-        cc = os.path.join(bindir, 'avr-gcc')
+        script_suffix = ""
+        exe_suffix = ""
+        if self._settings_build.os == "Linux":
+            script_suffix = ".sh"
+        else:
+            script_suffix = ".ps1"
+            exe_suffix = ".exe"
+
+        cc = os.path.join(bindir, f'avr-gcc{exe_suffix}')
         self.output.info("Creating CC env var with: " + cc)
         self.buildenv_info.define("CC", cc)
 
-        cxx = os.path.join(bindir, 'avr-g++.sh')
+        cxx = os.path.join(bindir, f'avr-g++{script_suffix}')
         self.output.info("Creating CXX env var with: " + cxx)
         self.buildenv_info.define("CXX", cxx)
 
-        ar = os.path.join(bindir, 'avr-gcc-ar')
+        ar = os.path.join(bindir, f'avr-gcc-ar{exe_suffix}')
         self.output.info("Creating AR env var with: " + ar)
         self.buildenv_info.define("AR", ar)
 
-        nm = os.path.join(bindir, "avr-gcc-nm")
+        nm = os.path.join(bindir, f"avr-gcc-nm{exe_suffix}")
         self.output.info("Creating NM env var with: " + nm)
         self.buildenv_info.define("NM", nm)
 
-        ranlib = os.path.join(bindir, "avr-gcc-ranlib")
+        ranlib = os.path.join(bindir, f"avr-gcc-ranlib{exe_suffix}")
         self.output.info("Creating RANLIB env var with: " + ranlib)
         self.buildenv_info.define("RANLIB", ranlib)
 
-        strip = os.path.join(bindir, "avr-strip")
+        strip = os.path.join(bindir, f"avr-strip{exe_suffix}")
         self.output.info("Creating STRIP env var with: " + strip)
         self.buildenv_info.define("STRIP", strip)
         

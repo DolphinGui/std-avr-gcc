@@ -27,9 +27,12 @@ confbuild mpfr "$ARGS"
 confbuild mpc "$ARGS"
 fi
 
+if [ -n "$HOSTFLAG" ]; then
+  CROSS="--cross-file meson-windows.txt"
+fi
+
 meson setup $HOST-build-faeutil faeutil --buildtype debugoptimized  --prefer-static \
-            --prefix $PREFIX --wrap-mode nodownload -Dfmt:default_library=static \
-            --cross-file meson-windows.txt
+            --prefix $PREFIX --wrap-mode nodownload -Dfmt:default_library=static $CROSS
 meson compile -C $HOST-build-faeutil 
 meson install -C $HOST-build-faeutil --skip-subprojects
 
