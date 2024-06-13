@@ -66,5 +66,5 @@ confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
  --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
 
 cd avrexcept
-sh install.sh $PREFIX/avr
+sh install.sh
 cd ..
