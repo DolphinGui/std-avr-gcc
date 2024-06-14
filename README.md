@@ -26,3 +26,7 @@ avrlibc does not come with certain locale functions that `iostream` needs.
 I didn't patch them in because even with stub locale functions, `iostream` floating
 point conversions are too large to fit in any AVR microcontroller. I also haven't tested
 the standard library very rigourously.
+
+## Examples
+
+See [this](https://github.com/DolphinGui/avrexcept/blob/main/test/test.cpp).
