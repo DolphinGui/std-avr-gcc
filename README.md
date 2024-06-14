@@ -22,6 +22,8 @@ I also wanted to use STL containers without having to hack it in.
 
 ## Known limitations
 
+This doesn't work with LTO enabled for some reason.
+
 avrlibc does not come with certain locale functions that `iostream` needs.
 I didn't patch them in because even with stub locale functions, `iostream` floating
 point conversions are too large to fit in any AVR microcontroller. I also haven't tested
