@@ -22,7 +22,9 @@ I also wanted to use STL containers without having to hack it in.
 
 ## Known limitations
 
-This doesn't work with LTO enabled for some reason.
+This doesn't work with LTO enabled for some reason. It also doesn't process ISR unwind information
+correctly, since ISRs save even call-used registers. The reason for that is that ISR's should be noexcept,
+since if exceptions could propagate from interrupts, literally all functions could possibly throw.
 
 avrlibc does not come with certain locale functions that `iostream` needs.
 I didn't patch them in because even with stub locale functions, `iostream` floating
