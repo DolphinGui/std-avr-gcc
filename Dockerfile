@@ -7,29 +7,31 @@ WORKDIR /work
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get upgrade -y
-RUN apt-get install -y      gcc-12
-RUN apt-get install -y      mingw-w64
-RUN apt-get install -y      git
-RUN apt-get install -y      wget
-RUN apt-get install -y      dtrx
-RUN apt-get install -y      autoconf2.64
-RUN apt-get install -y      build-essential
-RUN apt-get install -y      netpbm
-RUN apt-get install -y      libmpc-dev
-RUN apt-get install -y      libmpfr-dev
-RUN apt-get install -y      libgmp-dev
-RUN apt-get install -y      libmpfr6
-RUN apt-get install -y      texinfo
-RUN apt-get install -y      doxygen
-RUN apt-get install -y      flex
-RUN apt-get install -y      bison
-RUN apt-get install -y      libexpat1-dev
-RUN apt-get install -y      slang-xfig
-RUN apt-get install -y      meson
-RUN apt-get install -y      ninja-build
-RUN apt-get install -y      pkg-config
-RUN apt-get install -y      libz-dev
-RUN apt-get install -y      libz-mingw-w64-dev
+RUN apt-get install -y   \
+    gcc-12=12.2.0-14     \
+    mingw-w64=10.0.0-3   \
+    git=1:2.39.2-1.1     \
+    wget=1.21.3-1+b2        \
+    dtrx=8.4.0-2         \
+    autoconf2.64         \
+    g++=4:12.2.0-3       \
+    dpkg-dev=1.21.22     \
+    libc6-dev=2.36-9+deb12u7 \
+    make=4.3-4.1         \
+    netpbm=2:11.01.00-2   \
+    libmpc-dev=1.3.1-1   \
+    libmpfr-dev=4.2.0-1  \
+    libgmp-dev=2:6.2.1+dfsg1-1.1 \
+    libmpfr6=4.2.0-1     \
+    texinfo=6.8-6+b1       \
+    doxygen=1.9.4-4      \
+    flex=2.6.4-8.2  \
+    bison=2:3.8.2+dfsg-1+b1 \
+    libexpat1-dev=2.5.0-1 \
+    slang-xfig=0.2.0~.136-2 \
+    meson=1.0.1-5        \
+    ninja-build=1.11.1-1 \
+    pkg-config=1.8.1-1
 RUN   apt-get clean \
        && rm -rf /var/lib/apt/lists/*
 

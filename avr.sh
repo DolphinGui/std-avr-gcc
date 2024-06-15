@@ -5,7 +5,7 @@
 
 set -ex
 
-PREFIX="$1"
+export PREFIX="$1"
 
 confbuild()
 {

@@ -20,7 +20,7 @@ class AvrGnuToolchain(ConanFile):
     package_type = "application"
     major=0
     minor=6
-    patch=1
+    patch=2
     version = f"{major}.{minor}.{patch}"
 
 
@@ -59,9 +59,9 @@ class AvrGnuToolchain(ConanFile):
 
     def build(self):
         if  self._settings_build.os == "Linux":
-            file = "root.tar.xz"
+            file = "root.tar.zstd"
         elif self._settings_build.os == "Windows":
-            file = "winroot.tar.xz"
+            file = "winroot.tar.zstd"
         download(self,
             f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
             filename=file,
