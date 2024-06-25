@@ -63,7 +63,7 @@ class AvrGnuToolchain(ConanFile):
         elif self._settings_build.os == "Windows":
             file = "winroot.tar.xz"
         download(self,
-            f'https://github.com/DolphinGui/std-avr-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
+            f'https://github.com/DolphinGui/std-avr-gcc/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
             filename=file,
             verify=False)
         unzip(self, file)
