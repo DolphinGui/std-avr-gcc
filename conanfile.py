@@ -20,7 +20,7 @@ class AvrGnuToolchain(ConanFile):
     package_type = "application"
     major=0
     minor=6
-    patch=2
+    patch=3
     version = f"{major}.{minor}.{patch}"
 
 
@@ -59,11 +59,11 @@ class AvrGnuToolchain(ConanFile):
 
     def build(self):
         if  self._settings_build.os == "Linux":
-            file = "root.tar.zstd"
+            file = "root.tar.xz"
         elif self._settings_build.os == "Windows":
-            file = "winroot.tar.zstd"
+            file = "winroot.tar.xz"
         download(self,
-            f'https://github.com/DolphinGui/avr-gcc-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
+            f'https://github.com/DolphinGui/std-avr-conantool/releases/download/v{self.major}.{self.minor}.{self.patch}-alpha/{file}',
             filename=file,
             verify=False)
         unzip(self, file)
@@ -76,6 +76,10 @@ class AvrGnuToolchain(ConanFile):
         copy(self, pattern="*",src=os.path.join(self.build_folder, dir),
              dst=self.package_folder, keep_path=True)
 
+        resource_dir = os.path.join(self.package_folder, "res/")
+        copy(self, pattern="toolchain.cmake", src=self.build_folder,
+             dst=resource_dir, keep_path=True)
+
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
 
@@ -87,35 +91,22 @@ class AvrGnuToolchain(ConanFile):
             script_suffix = ".ps1"
             exe_suffix = ".exe"
 
-        cc = os.path.join(bindir, f'avr-gcc{exe_suffix}')
-        self.output.info("Creating CC env var with: " + cc)
-        self.buildenv_info.define("CC", cc)
+        self.cpp_info.includedirs = []
+        self.cpp_info.bindirs = [bindir]
+        self.buildenv_info.append_path("PATH", bindir)
 
-        cxx = os.path.join(bindir, f'avr-g++{script_suffix}')
-        self.output.info("Creating CXX env var with: " + cxx)
-        self.buildenv_info.define("CXX", cxx)
+        self.conf_info.define(
+            "tools.cmake.cmaketoolchain:system_name", "Generic")
+        self.conf_info.define(
+            "tools.cmake.cmaketoolchain:system_processor", "avr")
 
-        ar = os.path.join(bindir, f'avr-gcc-ar{exe_suffix}')
-        self.output.info("Creating AR env var with: " + ar)
-        self.buildenv_info.define("AR", ar)
+        self.conf_info.define("tools.build.cross_building:can_run", False)
+        self.conf_info.define("tools.build:compiler_executables", {
+            "c":  f'avr-gcc{exe_suffix}',
+            "cpp": f'avr-g++{script_suffix}',
+            "asm": f'avr-as{exe_suffix}',
+        })
 
-        nm = os.path.join(bindir, f"avr-gcc-nm{exe_suffix}")
-        self.output.info("Creating NM env var with: " + nm)
-        self.buildenv_info.define("NM", nm)
+        f = os.path.join(self.package_folder, "res/toolchain.cmake")
+        self.conf_info.append("tools.cmake.cmaketoolchain:user_toolchain", f)
 
-        ranlib = os.path.join(bindir, f"avr-gcc-ranlib{exe_suffix}")
-        self.output.info("Creating RANLIB env var with: " + ranlib)
-        self.buildenv_info.define("RANLIB", ranlib)
-
-        strip = os.path.join(bindir, f"avr-strip{exe_suffix}")
-        self.output.info("Creating STRIP env var with: " + strip)
-        self.buildenv_info.define("STRIP", strip)
-        
-        self.buildenv_info.define("LDFLAGS", "-lfae")
-
-        # TODO: Remove after conan 2.0 is released
-        self.env_info.CC = cc
-        self.env_info.CXX = cxx
-        self.env_info.AR = ar
-        self.env_info.NM = nm
-        self.env_info.RANLIB = ranlib
