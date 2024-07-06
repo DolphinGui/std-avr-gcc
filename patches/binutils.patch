@@ -248,7 +248,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
        /* PR 16765: Missing or misplaced unwind directives can trigger this.  */
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/gas/config/tc-avr.c binutils-new/gas/config/tc-avr.c
 --- binutils-2.42/gas/config/tc-avr.c	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/gas/config/tc-avr.c	2024-07-05 09:24:49.550578599 -0700
++++ binutils-new/gas/config/tc-avr.c	2024-07-05 20:57:46.379112611 -0700
 @@ -28,6 +28,9 @@
  #include "elf/avr.h"
  #include "elf32-avr.h"
@@ -297,7 +297,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
  #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
  
  #define EXP_MOD_NAME(i)       exp_mod[i].name
-@@ -2846,3 +2873,419 @@
+@@ -2846,3 +2873,423 @@
  
    return true;
  }
@@ -676,9 +676,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  /* Add index table entry.  This is two words.  */
 +  start_unwind_section (unwind.saved_seg, 1);
 +
-+  ptr = frag_more (10);
-+  memset (ptr, 0, 10);
-+  where = frag_now_fix () - 10;
++  ptr = frag_more (12);
++  memset (ptr, 0, 12);
++  where = frag_now_fix () - 12;
 +
 +  /* function start.  */
 +  fix_new (frag_now, where, 2, unwind.proc_start, 0, 0,
@@ -703,10 +703,14 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  ptr[7] = unwind.opcode_count;
 +
 +  if(unwind.personality_data){
-+    fix_new (frag_now, where + 8, 1, unwind.personality_data, 0, 1,
-+       BFD_RELOC_AVR_8_LO);
-+    fix_new (frag_now, where + 9, 1, unwind.personality_data, 0, 1,
-+       BFD_RELOC_AVR_8_HI);
++    fix_new (frag_now, where + 8, 1, unwind.personality_data, 0, 0,
++       BFD_RELOC_16);
++  }
++
++  if(unwind.personality_routine){
++  fix_new (frag_now, where + 10, 2, unwind.personality_routine, 0, 0,
++     BFD_RELOC_AVR_16_PM);
++
 +  }
 +
 +

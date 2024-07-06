@@ -28,7 +28,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
 --- gcc-13.2.0/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr.cc	2024-07-04 19:12:40.470793039 -0700
++++ gcc-new/gcc/config/avr/avr.cc	2024-07-06 07:39:45.744748972 -0700
 @@ -1467,6 +1467,270 @@
  }
  
@@ -300,18 +300,20 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  /* Implement `ACCUMULATE_OUTGOING_ARGS'.  */
  
  int
-@@ -10725,6 +10989,10 @@
+@@ -10725,6 +10989,12 @@
      readonly_data_section->unnamed.callback = avr_output_data_section_asm_op;
    data_section->unnamed.callback = avr_output_data_section_asm_op;
    bss_section->unnamed.callback = avr_output_bss_section_asm_op;
 +
-+  /* insert .handlerdata directive */
++  /* insert .handlerdata and personality directive */
 +  exception_section = get_unnamed_section (0, output_section_asm_op,
-+             "\t.section .gcc_except_table,\"a\",@progbits\n\t.handlerdata");
++             "\t.personality __avr_cxx_personality\n"
++             "\t.section .gcc_except_table,\"a\",@progbits\n"
++             "\t.handlerdata");
  }
  
  
-@@ -13521,6 +13789,16 @@
+@@ -13521,6 +13791,16 @@
    return NULL_TREE;
  }
  
@@ -328,7 +330,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  
  /* Implement `TARGET_LEGITIMATE_COMBINED_INSN'.  */
  
-@@ -15119,6 +15397,9 @@
+@@ -15119,6 +15399,9 @@
  #undef  TARGET_ADDR_SPACE_DIAGNOSE_USAGE
  #define TARGET_ADDR_SPACE_DIAGNOSE_USAGE avr_addr_space_diagnose_usage
  
@@ -434,8 +436,8 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/fae.h gcc-new/libgcc/config/avr/fae.h
 --- gcc-13.2.0/libgcc/config/avr/fae.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libgcc/config/avr/fae.h	2024-07-05 14:30:16.290847296 -0700
-@@ -0,0 +1,109 @@
++++ gcc-new/libgcc/config/avr/fae.h	2024-07-06 07:53:15.024696697 -0700
+@@ -0,0 +1,93 @@
 +#pragma once
 +
 +typedef unsigned char uint8_t;
@@ -450,6 +452,14 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#define __maybe_flash
 +#endif
 +
++
++typedef struct personality_out{
++  uint16_t landing_pad;
++} personality_out;
++
++typedef uint8_t (*personality_routine)(prog_byte *ptr, uint16_t pc_offset, void *exc,
++                           personality_out *lp_out);
++
 +typedef struct table_entry_t {
 +  uint16_t pc_begin;
 +  uint16_t pc_end;
@@ -457,6 +467,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  uint8_t frame_reg;
 +  uint8_t length;
 +  prog_byte *lsda;
++  personality_routine personality;
 +} table_entry_t;
 +
 +/* Entries are aligned by 2 so that personality_ptr
@@ -509,31 +520,6 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  skip s;
 +  uint8_t byte;
 +} frame_inst;
-+
-+enum {
-+  DW_EH_PE_absptr = 0x00,
-+  DW_EH_PE_omit = 0xff,
-+
-+  /* FDE data encoding.  */
-+  DW_EH_PE_uleb128 = 0x01,
-+  DW_EH_PE_udata2 = 0x02,
-+  DW_EH_PE_udata4 = 0x03,
-+  DW_EH_PE_udata8 = 0x04,
-+  DW_EH_PE_sleb128 = 0x09,
-+  DW_EH_PE_sdata2 = 0x0a,
-+  DW_EH_PE_sdata4 = 0x0b,
-+  DW_EH_PE_sdata8 = 0x0c,
-+  DW_EH_PE_signed = 0x08,
-+
-+  /* FDE flags.  */
-+  DW_EH_PE_pcrel = 0x10,
-+  DW_EH_PE_textrel = 0x20,
-+  DW_EH_PE_datarel = 0x30,
-+  DW_EH_PE_funcrel = 0x40,
-+  DW_EH_PE_aligned = 0x50,
-+
-+  DW_EH_PE_indirect = 0x80
-+};
 +
 +typedef struct table_data {
 +  prog_byte *data;      // r18-19
@@ -804,126 +790,18 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 \ No newline at end of file
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c gcc-new/libgcc/config/avr/unwind-avr-sup.c
 --- gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libgcc/config/avr/unwind-avr-sup.c	2024-07-05 14:53:29.550746572 -0700
-@@ -0,0 +1,146 @@
++++ gcc-new/libgcc/config/avr/unwind-avr-sup.c	2024-07-06 07:30:15.224789521 -0700
+@@ -0,0 +1,40 @@
 +#include "fae.h"
 +
-+extern prog_byte __lsda_begin[];
 +extern prog_byte __fae_table_start[];
 +extern prog_byte __fae_table_stop[];
 +
++typedef const table_entry_t __maybe_flash * table_ptr;
++
 +void __avr_terminate() __attribute__((noreturn));
-+
-+static uint8_t uleb(prog_byte *ptr, uint16_t *out) {
-+  *out = *ptr++;
-+  if (!(*out & 0b10000000)) {
-+    return 1;
-+  } else {
-+    *out &= 0b01111111;
-+    if (*ptr & 0b00000001) {
-+      *out |= 0b10000000;
-+    }
-+    *out |= *ptr << 7;
-+    return 2;
-+  }
-+}
-+
-+// here because for some reason g++ emits symbols for it directly in cfi
-+// directives Really should rewrite gxx_personality instead of doing it here,
-+// but for now this works
-+void __gxx_personality_v0() {}
 +// no plans to implement forced unwinding
 +void _Unwind_ForcedUnwind() { __avr_terminate(); }
-+
-+static uint8_t sleb(prog_byte *data, int16_t *const val) {
-+  int16_t i = 0;
-+
-+  uint8_t b = data[i++];
-+  *val = b & 0b01111111;
-+
-+  if (b & 0b10000000) {
-+    b = data[i++];
-+    *val <<= 7;
-+    *val |= b & 0b01111111;
-+  }
-+
-+  if (b & 0x40) {
-+    *val |= (-1ULL) << 7;
-+    return i;
-+  }
-+  return i;
-+}
-+
-+void *__avr_get_adjusted_exc(void *exc, const void *catch_type);
-+
-+// this is very bad, and probably should be rewritten in assembly for speed/size
-+static uint8_t personality(prog_byte *ptr, uint16_t pc_offset, void *exc,
-+                           uint16_t *lp_out) {
-+  typedef void *const __maybe_flash prog_ptr;
-+  uint8_t lp_encoding = *ptr++;
-+  uint16_t lp_offset = 0;
-+  if (lp_encoding != DW_EH_PE_omit) {
-+    ptr += uleb(ptr, &lp_offset);
-+  }
-+  uint8_t type_encoding = *ptr++;
-+  uint16_t types_offset = 0;
-+  if (type_encoding != DW_EH_PE_omit) {
-+    ptr += uleb(ptr, &types_offset);
-+  }
-+
-+
-+  prog_ptr *type_table = (prog_ptr *)(ptr + types_offset);
-+  uint8_t call_encoding = *ptr++;
-+  uint16_t call_table_length;
-+  ptr += uleb(ptr, &call_table_length);
-+  if ((type_encoding != DW_EH_PE_absptr && type_encoding != DW_EH_PE_omit) ||
-+      call_encoding != DW_EH_PE_uleb128) {
-+    __avr_terminate();
-+  }
-+  prog_byte *end = ptr + call_table_length;
-+  uint16_t lp_ip;
-+  uint16_t action_offset;
-+  while (ptr < end) {
-+    uint16_t ip_start;
-+    ptr += uleb(ptr, &ip_start);
-+    uint16_t ip_range;
-+    ptr += uleb(ptr, &ip_range);
-+    ptr += uleb(ptr, &lp_ip);
-+    ptr += uleb(ptr, &action_offset);
-+    if (ip_start < pc_offset && pc_offset <= ip_start + ip_range) {
-+      *lp_out = lp_ip;
-+      goto found_handler;
-+    }
-+  }
-+  __avr_terminate();
-+found_handler:
-+  if (action_offset == 0) {
-+    return 0;
-+  }
-+  ptr = end + action_offset - 1;
-+  while (1) {
-+    int16_t action, offset;
-+    ptr += sleb(ptr, &action);
-+    sleb(ptr, &offset);
-+    ptr += offset;
-+    if (action != 0) {
-+      void *catch_type = type_table[-1 * action];
-+      if (catch_type == 0) // if it is a catch(...) block, match anything
-+        return action;
-+      void *ptr = __avr_get_adjusted_exc(exc, catch_type);
-+      if (ptr) {
-+        return action;
-+      }
-+    } else {
-+      return 0;
-+    }
-+    if (offset == 0)
-+      break;
-+  }
-+  __avr_terminate();
-+}
-+
-+typedef const table_entry_t __maybe_flash * table_ptr;
 +
 +// returns data pointer for pc entry. If no entry is found, return 0
 +table_data __fae_get_ptr(void *except, uint16_t pc) {
@@ -936,9 +814,11 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +      result.data_end = ptr->data + ptr->length;
 +      result.fp_register = ptr->frame_reg;
 +      if (ptr->lsda != 0) {
++        personality_out out = {};
 +        result.type_index =
-+            personality(ptr->lsda, (pc - ptr->pc_begin) * 2,
-+                        except, &result.landing_pad);
++            ptr->personality(ptr->lsda, (pc - ptr->pc_begin) * 2,
++                        except, &out);
++        result.landing_pad = out.landing_pad;
 +        if (result.landing_pad == 0) {
 +          result.type_index = 0xff;
 +          return result;
@@ -2080,10 +1960,25 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
    inline _GLIBCXX_CONSTEXPR float
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc gcc-new/libstdc++-v3/libsupc++/eh_avr.cc
 --- gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/libsupc++/eh_avr.cc	2024-06-28 19:19:46.688337030 -0700
-@@ -0,0 +1,34 @@
-+#include <typeinfo>
++++ gcc-new/libstdc++-v3/libsupc++/eh_avr.cc	2024-07-06 08:48:04.814443897 -0700
+@@ -0,0 +1,169 @@
++#ifdef __AVR_ARCH__
++
++
++
++#include <bits/c++config.h>
++#include <bits/exception_defines.h>
++#include <cxxabi.h>
 +#include "unwind-cxx.h"
++#include <cstdlib>
++
++#include <typeinfo>
++#include "unwind-pe.h"
++#include <avr/pgmspace.h>
++
++typedef unsigned char uint8_t;
++typedef unsigned int uint16_t;
++typedef int int16_t;
 +
 +namespace __cxxabiv1{
 +static void *get_adjusted_ptr(const void *c, const std::type_info *t,
@@ -2100,8 +1995,8 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  return nullptr;
 +}
 +
-+extern "C" void *__avr_get_adjusted_exc(void *exc,
-+                                        const std::type_info *catch_type) {
++static void *get_adjusted_ptr(void *exc,
++                                        const void *catch_type) noexcept {
 +  auto ue = static_cast<_Unwind_Exception *>(exc);
 +  auto cxa_except = __get_exception_header_from_ue(ue);
 +  auto thrown_obj = __get_object_from_ue(ue);
@@ -2115,8 +2010,127 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  std::terminate();
 +}
 +
++typedef const uint8_t prog_byte;
++typedef void* void_ptr;
++typedef const void_ptr *prog_ptr;
++
++
++static uint8_t get(prog_byte* p){
++  return __LPM((unsigned)p);
 +}
-\ No newline at end of file
++
++static void* getw(prog_ptr p){
++  return (void*) __LPM_word((unsigned)p);
++}
++
++static uint8_t uleb(prog_byte *ptr, uint16_t *out) {
++  *out = get(ptr++);
++  if (!(*out & 0b10000000)) {
++    return 1;
++  } else {
++    *out &= 0b01111111;
++    if (get(ptr) & 0b00000001) {
++      *out |= 0b10000000;
++    }
++    *out |= get(ptr) << 7;
++    return 2;
++  }
++}
++
++
++static uint8_t sleb(prog_byte *ptr, int16_t *const val) {
++  int16_t i = 0;
++
++  uint8_t b = get(&ptr[i++]);
++  *val = b & 0b01111111;
++
++  if (b & 0b10000000) {
++    b = get(&ptr[i++]);
++    *val <<= 7;
++    *val |= b & 0b01111111;
++  }
++
++  if (b & 0x40) {
++    *val |= (-1ULL) << 7;
++    return i;
++  }
++  return i;
++}
++
++struct personality_out{
++  uint16_t landing_pad;
++};
++
++
++// this is very bad, and probably should be rewritten in assembly for speed/size
++extern "C" uint8_t __avr_cxx_personality(prog_byte *ptr, uint16_t pc_offset, void *exc,
++                           personality_out *out) noexcept {
++  uint8_t lp_encoding = get(ptr++);
++  uint16_t lp_offset = 0;
++  if (lp_encoding != DW_EH_PE_omit) {
++    // in reality lp offset never seems to be set. This should really
++    // consider if lp offset is set or not, but for now it works
++    ptr += uleb(ptr, &lp_offset);
++  }
++  uint8_t type_encoding = get(ptr++);
++  uint16_t types_offset = 0;
++  if (type_encoding != DW_EH_PE_omit) {
++    ptr += uleb(ptr, &types_offset);
++  }
++
++  prog_ptr type_table = reinterpret_cast<prog_ptr>(ptr + types_offset);
++  uint8_t call_encoding = get(ptr++);
++  uint16_t call_table_length;
++  ptr += uleb(ptr, &call_table_length);
++  if ((type_encoding != DW_EH_PE_absptr && type_encoding != DW_EH_PE_omit) ||
++      call_encoding != DW_EH_PE_uleb128) {
++    __avr_terminate();
++  }
++  prog_byte *end = ptr + call_table_length;
++  uint16_t lp_ip;
++  uint16_t action_offset;
++  while (ptr < end) {
++    uint16_t ip_start;
++    ptr += uleb(ptr, &ip_start);
++    uint16_t ip_range;
++    ptr += uleb(ptr, &ip_range);
++    ptr += uleb(ptr, &lp_ip);
++    ptr += uleb(ptr, &action_offset);
++    if (ip_start < pc_offset && pc_offset <= ip_start + ip_range) {
++      out->landing_pad = lp_ip;
++      goto found_handler;
++    }
++  }
++  __avr_terminate();
++found_handler:
++  if (action_offset == 0) {
++    return 0;
++  }
++  ptr = end + action_offset - 1;
++  while (1) {
++    int16_t action, offset;
++    ptr += sleb(ptr, &action);
++    sleb(ptr, &offset);
++    ptr += offset;
++    if (action != 0) {
++      void *catch_type = getw(&type_table[-1 * action]);
++      if (catch_type == 0) // if it is a catch(...) block, match anything
++        return action;
++      void *ptr = get_adjusted_ptr(exc, catch_type);
++      if (ptr) {
++        return action;
++      }
++    } else {
++      return 0;
++    }
++    if (offset == 0)
++      break;
++  }
++  __avr_terminate();
++}
++
++}
++#endif
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc gcc-new/libstdc++-v3/libsupc++/eh_personality.cc
 --- gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc	2023-07-27 01:13:08.000000000 -0700
 +++ gcc-new/libstdc++-v3/libsupc++/eh_personality.cc	2024-07-03 07:23:08.107411866 -0700
