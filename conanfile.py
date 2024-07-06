@@ -19,8 +19,8 @@ class AvrGnuToolchain(ConanFile):
     exports_sources = "toolchain.cmake"
     package_type = "application"
     major=0
-    minor=6
-    patch=3
+    minor=7
+    patch=0
     version = f"{major}.{minor}.{patch}"
 
 
@@ -83,12 +83,8 @@ class AvrGnuToolchain(ConanFile):
     def package_info(self):
         bindir = os.path.join(self.package_folder, "bin")
 
-        script_suffix = ""
         exe_suffix = ""
-        if self._settings_build.os == "Linux":
-            script_suffix = ".sh"
-        else:
-            script_suffix = ".ps1"
+        if self._settings_build.os != "Linux":
             exe_suffix = ".exe"
 
         self.cpp_info.includedirs = []
@@ -103,7 +99,7 @@ class AvrGnuToolchain(ConanFile):
         self.conf_info.define("tools.build.cross_building:can_run", False)
         self.conf_info.define("tools.build:compiler_executables", {
             "c":  f'avr-gcc{exe_suffix}',
-            "cpp": f'avr-g++{script_suffix}',
+            "cpp": f'avr-g++{exe_suffix}',
             "asm": f'avr-as{exe_suffix}',
         })
 

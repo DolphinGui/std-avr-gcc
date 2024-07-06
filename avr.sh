@@ -27,15 +27,6 @@ confbuild mpfr "$ARGS"
 confbuild mpc "$ARGS"
 fi
 
-if [ -n "$HOSTFLAG" ]; then
-  CROSS="--cross-file meson-windows.txt"
-fi
-
-meson setup $HOST-build-faeutil faeutil --buildtype debugoptimized  --prefer-static \
-            --prefix $PREFIX --wrap-mode nodownload -Dfmt:default_library=static $CROSS
-meson compile -C $HOST-build-faeutil 
-meson install -C $HOST-build-faeutil --skip-subprojects
-
 confbuild binutils "--prefix=$PREFIX --target=avr $HOSTFLAG"
 export PATH=$PREFIX/bin:$PATH
 
@@ -64,7 +55,3 @@ confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
  --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 \
  --with-specs=%{!frtti:%{!frtti:-frtti}} \
  --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
-
-cd avrexcept
-sh install.sh
-cd ..
