@@ -20,7 +20,7 @@ class AvrGnuToolchain(ConanFile):
     package_type = "application"
     major=0
     minor=7
-    patch=0
+    patch=1
     version = f"{major}.{minor}.{patch}"
 
 

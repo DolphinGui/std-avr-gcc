@@ -248,7 +248,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
        /* PR 16765: Missing or misplaced unwind directives can trigger this.  */
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/gas/config/tc-avr.c binutils-new/gas/config/tc-avr.c
 --- binutils-2.42/gas/config/tc-avr.c	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/gas/config/tc-avr.c	2024-07-05 20:57:46.379112611 -0700
++++ binutils-new/gas/config/tc-avr.c	2024-07-07 07:02:05.726824940 -0700
 @@ -28,6 +28,9 @@
  #include "elf/avr.h"
  #include "elf32-avr.h"
@@ -297,7 +297,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
  #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
  
  #define EXP_MOD_NAME(i)       exp_mod[i].name
-@@ -2846,3 +2873,423 @@
+@@ -2846,3 +2873,429 @@
  
    return true;
  }
@@ -658,7 +658,6 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  char *ptr;
 +
 +  symbolS* function_end = expr_build_dot ();
-+
 +  demand_empty_rest_of_line ();
 +
 +  if (!unwind.proc_start)
@@ -671,6 +670,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +    goto end;
 +  }
 +
++
 +  create_unwind_entry();
 +
 +  /* Add index table entry.  This is two words.  */
@@ -679,6 +679,8 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  ptr = frag_more (12);
 +  memset (ptr, 0, 12);
 +  where = frag_now_fix () - 12;
++
++  symbolS* unwind_begin = expr_build_dot ();
 +
 +  /* function start.  */
 +  fix_new (frag_now, where, 2, unwind.proc_start, 0, 0,
@@ -717,6 +719,10 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  /* Restore the original section.  */
 +  subseg_set (unwind.saved_seg, unwind.saved_subseg);
 +
++  // indicate to linker script that function depends on section
++  fix_new (frag_now, 0, 0, unwind_begin, 0, 0,
++     BFD_RELOC_NONE);
++
 +end:
 +  unwind.proc_start = NULL;
 +}
@@ -740,7 +746,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
       RELOC_NUMBER (R_AVR_NONE,			0)
 diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/ld/scripttempl/avr.sc binutils-new/ld/scripttempl/avr.sc
 --- binutils-2.42/ld/scripttempl/avr.sc	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/ld/scripttempl/avr.sc	2024-07-03 07:18:29.857432322 -0700
++++ binutils-new/ld/scripttempl/avr.sc	2024-07-07 08:40:27.086384089 -0700
 @@ -206,7 +206,6 @@
      *libc.a:*(.progmem.data)
  
@@ -759,11 +765,11 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +    *(.gcc_except_table)
 +    *(.gcc_except_table.*)
 +    PROVIDE (__fae_table_start = .) ;
-+    KEEP(*(.fae_info))
-+    KEEP(*(.fae_info.*))
++    *(.fae_info)
++    *(.fae_info.*)
 +    PROVIDE (__fae_table_stop = .) ; ;}
-+    KEEP(*(.fae_data))
-+    KEEP(*(.fae_data.*))
++    *(.fae_data)
++    *(.fae_data.*)
    } ${RELOCATING+ > text}
  EOF
  
