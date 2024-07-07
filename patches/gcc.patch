@@ -809,7 +809,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  result.type_index = 0xff;
 +
 +  for (table_ptr ptr = __fae_table_start; ptr < __fae_table_stop; ptr++) {
-+    if (ptr->pc_begin < pc && pc < ptr->pc_end) {
++    if (ptr->pc_begin < pc && pc <= ptr->pc_end) {
 +      result.data = ptr->data;
 +      result.data_end = ptr->data + ptr->length;
 +      result.fp_register = ptr->frame_reg;
