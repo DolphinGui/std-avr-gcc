@@ -1,6 +1,6 @@
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/common/config/avr/avr-common.cc gcc-new/gcc/common/config/avr/avr-common.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/common/config/avr/avr-common.cc gcc/gcc/common/config/avr/avr-common.cc
 --- gcc-13.2.0/gcc/common/config/avr/avr-common.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/common/config/avr/avr-common.cc	2024-07-01 10:42:04.675809016 -0700
++++ gcc/gcc/common/config/avr/avr-common.cc	2024-07-06 18:54:13.811713418 -0700
 @@ -141,6 +141,16 @@
  }
  
@@ -26,10 +26,10 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#define TARGET_EXCEPT_UNWIND_INFO avr_except_unwind_info
  
  struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr.cc gcc-new/gcc/config/avr/avr.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr.cc gcc/gcc/config/avr/avr.cc
 --- gcc-13.2.0/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr.cc	2024-07-06 07:39:45.744748972 -0700
-@@ -1467,6 +1467,270 @@
++++ gcc/gcc/config/avr/avr.cc	2024-07-11 14:15:35.722307483 -0700
+@@ -1467,6 +1467,271 @@
  }
  
  
@@ -52,17 +52,18 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  if (avr_except_unwind_info (&global_options) != UI_TARGET)
 +    return;
 +
-+  if (prologue)
-+    fputs ("\t.fnstart\n", f);
-+  else
-+    {
-+      /* If this function will never be unwound, then mark it as such.
-+         The came condition is used in arm_unwind_emit to suppress
++  if (prologue){
++     /* If this function will never be unwound, then mark it as such.
++         The same condition is used in arm_unwind_emit to suppress
 +   the frame annotations.  */
 +      if (!(flag_unwind_tables || crtl->uses_eh_lsda)
 +    && (TREE_NOTHROW (current_function_decl)
 +        || crtl->all_throwers_are_sibcalls))
 +  fputs("\t.cantunwind\n", f);
++      fputs ("\t.fnstart\n", f);}
++  else
++    {
++     
 +
 +      fputs ("\t.fnend\n", f);
 +    }
@@ -300,7 +301,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  /* Implement `ACCUMULATE_OUTGOING_ARGS'.  */
  
  int
-@@ -10725,6 +10989,12 @@
+@@ -10725,6 +10990,12 @@
      readonly_data_section->unnamed.callback = avr_output_data_section_asm_op;
    data_section->unnamed.callback = avr_output_data_section_asm_op;
    bss_section->unnamed.callback = avr_output_bss_section_asm_op;
@@ -313,7 +314,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  }
  
  
-@@ -13521,6 +13791,16 @@
+@@ -13521,6 +13792,16 @@
    return NULL_TREE;
  }
  
@@ -330,7 +331,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  
  /* Implement `TARGET_LEGITIMATE_COMBINED_INSN'.  */
  
-@@ -15119,6 +15399,9 @@
+@@ -15119,6 +15400,9 @@
  #undef  TARGET_ADDR_SPACE_DIAGNOSE_USAGE
  #define TARGET_ADDR_SPACE_DIAGNOSE_USAGE avr_addr_space_diagnose_usage
  
@@ -340,9 +341,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  #undef  TARGET_MODE_DEPENDENT_ADDRESS_P
  #define TARGET_MODE_DEPENDENT_ADDRESS_P avr_mode_dependent_address_p
  
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr.h gcc-new/gcc/config/avr/avr.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr.h gcc/gcc/config/avr/avr.h
 --- gcc-13.2.0/gcc/config/avr/avr.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr.h	2024-07-02 13:50:50.879568104 -0700
++++ gcc/gcc/config/avr/avr.h	2024-07-06 18:54:13.811713418 -0700
 @@ -386,6 +386,8 @@
     There are no shared libraries on this target, and these sections are
     placed in the read-only program memory, so they are not writable.  */
@@ -382,9 +383,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  #define INCOMING_RETURN_ADDR_RTX   avr_incoming_return_addr_rtx ()
  #define INCOMING_FRAME_SP_OFFSET   (AVR_3_BYTE_PC ? 3 : 2)
  
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/avr-protos.h gcc-new/gcc/config/avr/avr-protos.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr-protos.h gcc/gcc/config/avr/avr-protos.h
 --- gcc-13.2.0/gcc/config/avr/avr-protos.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/avr-protos.h	2024-07-01 10:08:04.245972378 -0700
++++ gcc/gcc/config/avr/avr-protos.h	2024-07-06 18:54:13.811713418 -0700
 @@ -32,6 +32,10 @@
  extern void avr_register_target_pragmas (void);
  extern void avr_init_expanders (void);
@@ -404,9 +405,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  extern bool avr_emit_cpymemhi (rtx*);
  extern int avr_epilogue_uses (int regno);
  
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/elf.h gcc-new/gcc/config/avr/elf.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/elf.h gcc/gcc/config/avr/elf.h
 --- gcc-13.2.0/gcc/config/avr/elf.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/elf.h	2024-07-02 13:50:56.639567781 -0700
++++ gcc/gcc/config/avr/elf.h	2024-07-06 18:54:13.811713418 -0700
 @@ -28,6 +28,16 @@
  #undef STRING_LIMIT
  #define STRING_LIMIT ((unsigned) 64)
@@ -426,17 +427,29 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 -#undef INIT_SECTION_ASM_OP
 -#undef FINI_SECTION_ASM_OP
 +
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/gcc/config/avr/specs.h gcc-new/gcc/config/avr/specs.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/specs.h gcc/gcc/config/avr/specs.h
 --- gcc-13.2.0/gcc/config/avr/specs.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc-new/gcc/config/avr/specs.h	2024-06-29 15:42:10.616468437 -0700
++++ gcc/gcc/config/avr/specs.h	2024-07-11 14:17:49.902304394 -0700
+@@ -40,9 +40,9 @@
+ #undef  CC1PLUS_SPEC
+ #define CC1PLUS_SPEC                                    \
+   "%(cc1) "                                             \
+-  "%{!frtti:-fno-rtti} "                                \
++  "%{!frtti:-frtti} "                                \
+   "%{!fenforce-eh-specs:-fno-enforce-eh-specs} "        \
+-  "%{!fexceptions:-fno-exceptions} "
++  "%{!fexceptions:-fexceptions} "
+ 
+ #define ASM_RELAX_SPEC                          \
+   "%{mrelax:--mlink-relax} "
 @@ -78,3 +78,4 @@
  
  #define STARTFILE_SPEC ""
  #define ENDFILE_SPEC ""
 +
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/fae.h gcc-new/libgcc/config/avr/fae.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/fae.h gcc/libgcc/config/avr/fae.h
 --- gcc-13.2.0/libgcc/config/avr/fae.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libgcc/config/avr/fae.h	2024-07-06 07:53:15.024696697 -0700
++++ gcc/libgcc/config/avr/fae.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,93 @@
 +#pragma once
 +
@@ -531,18 +544,18 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +
 +table_data __fae_get_ptr(void *except, uint16_t pc);
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/t-avr gcc-new/libgcc/config/avr/t-avr
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/t-avr gcc/libgcc/config/avr/t-avr
 --- gcc-13.2.0/libgcc/config/avr/t-avr	2023-07-27 01:13:07.000000000 -0700
-+++ gcc-new/libgcc/config/avr/t-avr	2024-06-28 19:25:14.318313184 -0700
++++ gcc/libgcc/config/avr/t-avr	2024-07-06 18:54:13.811713418 -0700
 @@ -294,3 +294,5 @@
  LIB2FUNCS_EXCLUDE += \
  	$(foreach func,_ssmul,\
  	$(foreach mode,$(ssmul_modes),$(func_X)))
 +
 +LIB2ADDEH = $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/unwind-avr.S gcc-new/libgcc/config/avr/unwind-avr.S
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/unwind-avr.S gcc/libgcc/config/avr/unwind-avr.S
 --- gcc-13.2.0/libgcc/config/avr/unwind-avr.S	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libgcc/config/avr/unwind-avr.S	2024-07-05 09:19:41.740619015 -0700
++++ gcc/libgcc/config/avr/unwind-avr.S	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,243 @@
 +.file	"unwind-avr.S"
 +
@@ -788,9 +801,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +#endif
 \ No newline at end of file
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c gcc-new/libgcc/config/avr/unwind-avr-sup.c
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c gcc/libgcc/config/avr/unwind-avr-sup.c
 --- gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libgcc/config/avr/unwind-avr-sup.c	2024-07-06 07:30:15.224789521 -0700
++++ gcc/libgcc/config/avr/unwind-avr-sup.c	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,40 @@
 +#include "fae.h"
 +
@@ -832,9 +845,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +  result.data = 0;
 +  return result;
 +}
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-dw2.c gcc-new/libgcc/unwind-dw2.c
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-dw2.c gcc/libgcc/unwind-dw2.c
 --- gcc-13.2.0/libgcc/unwind-dw2.c	2023-07-27 01:13:07.000000000 -0700
-+++ gcc-new/libgcc/unwind-dw2.c	2024-05-16 15:58:16.868929896 -0700
++++ gcc/libgcc/unwind-dw2.c	2024-07-06 18:54:13.811713418 -0700
 @@ -974,10 +974,6 @@
  		     struct _Unwind_Context *context,
  		     _Unwind_FrameState *fs)
@@ -846,9 +859,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
      execute_cfa_program_generic (insn_ptr, insn_end, context, fs);
  }
  
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-generic.h gcc-new/libgcc/unwind-generic.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-generic.h gcc/libgcc/unwind-generic.h
 --- gcc-13.2.0/libgcc/unwind-generic.h	2023-07-27 01:13:07.000000000 -0700
-+++ gcc-new/libgcc/unwind-generic.h	2024-05-23 20:03:38.624398808 -0700
++++ gcc/libgcc/unwind-generic.h	2024-07-06 18:54:13.811713418 -0700
 @@ -130,7 +130,7 @@
  
  /* Raise an exception, passing along the given exception object.  */
@@ -915,9 +928,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
    typedef long _sleb128_t;
    typedef unsigned long _uleb128_t;
  #elif __SIZEOF_LONG_LONG__ >= __SIZEOF_POINTER__
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind.inc gcc-new/libgcc/unwind.inc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind.inc gcc/libgcc/unwind.inc
 --- gcc-13.2.0/libgcc/unwind.inc	2023-07-27 01:13:07.000000000 -0700
-+++ gcc-new/libgcc/unwind.inc	2024-05-31 10:58:48.127709146 -0700
++++ gcc/libgcc/unwind.inc	2024-07-06 18:54:13.811713418 -0700
 @@ -82,8 +82,8 @@
  
  /* Raise an exception, passing along the given exception object.  */
@@ -973,9 +986,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  /* Perform stack backtrace through unwind data.  */
  
  _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libgcc/unwind-seh.c gcc-new/libgcc/unwind-seh.c
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-seh.c gcc/libgcc/unwind-seh.c
 --- gcc-13.2.0/libgcc/unwind-seh.c	2023-07-27 01:13:07.000000000 -0700
-+++ gcc-new/libgcc/unwind-seh.c	2024-05-23 20:04:29.304384262 -0700
++++ gcc/libgcc/unwind-seh.c	2024-07-06 18:54:13.811713418 -0700
 @@ -419,14 +419,6 @@
    return _Unwind_ForcedUnwind_Phase2 (exc);
  }
@@ -991,9 +1004,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  
  /* Perform stack backtrace through unwind data.  */
  
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h gcc-new/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h gcc/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	2024-05-25 14:00:44.077691243 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,44 @@
 +// Low-level functions for atomic operations: version for CPUs providing
 +// atomic builtins -*- C++ -*-
@@ -1039,9 +1052,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h gcc-new/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h gcc/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	2024-05-25 14:00:44.077691243 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,59 @@
 +// Low-level functions for atomic operations: Generic version  -*- C++ -*-
 +
@@ -1102,9 +1115,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h gcc-new/libstdc++-v3/config/cpu/avr/atomic_word.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h gcc/libstdc++-v3/config/cpu/avr/atomic_word.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/atomic_word.h	2024-05-25 14:00:44.067691244 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/atomic_word.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,40 @@
 +// Low-level type for atomic operations -*- C++ -*-
 +
@@ -1146,9 +1159,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#define _GLIBCXX_WRITE_MEM_BARRIER __atomic_thread_fence (__ATOMIC_RELEASE)
 +
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h gcc-new/libstdc++-v3/config/cpu/avr/cpu_defines.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h gcc/libstdc++-v3/config/cpu/avr/cpu_defines.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/cpu_defines.h	2024-05-25 14:00:44.067691244 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/cpu_defines.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,33 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1183,9 +1196,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#define _GLIBCXX_CPU_DEFINES 1
 +
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h gcc-new/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h gcc/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	2024-05-25 14:00:44.067691244 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,59 @@
 +// Control various target specific ABI tweaks.  Generic version.
 +
@@ -1246,9 +1259,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#endif
 +
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h gcc-new/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h gcc/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	2024-05-25 14:00:44.077691243 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,38 @@
 +// Optimizations for random number handling, generic version -*- C++ -*-
 +
@@ -1288,9 +1301,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +
 +#endif // _BITS_OPT_RANDOM_H
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h gcc-new/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h gcc/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
 --- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	2024-05-25 14:00:44.077691243 -0700
++++ gcc/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,38 @@
 +// Optimizations for random number extensions, generic version -*- C++ -*-
 +
@@ -1330,9 +1343,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +
 +#endif // _EXT_OPT_RANDOM_H
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h gcc-new/libstdc++-v3/config/os/avrlibc/ctype_base.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h gcc/libstdc++-v3/config/os/avrlibc/ctype_base.h
 --- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_base.h	2024-05-25 11:27:05.784778219 -0700
++++ gcc/libstdc++-v3/config/os/avrlibc/ctype_base.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,59 @@
 +// Locale support -*- C++ -*-
 +
@@ -1393,9 +1406,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc gcc-new/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc gcc/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
 --- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	2024-05-25 11:27:05.784778219 -0700
++++ gcc/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,99 @@
 +// Locale support -*- C++ -*-
 +
@@ -1496,9 +1509,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h gcc-new/libstdc++-v3/config/os/avrlibc/ctype_inline.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h gcc/libstdc++-v3/config/os/avrlibc/ctype_inline.h
 --- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/os/avrlibc/ctype_inline.h	2024-05-25 11:27:05.784778219 -0700
++++ gcc/libstdc++-v3/config/os/avrlibc/ctype_inline.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,173 @@
 +// Locale support -*- C++ -*-
 +
@@ -1673,9 +1686,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h gcc-new/libstdc++-v3/config/os/avrlibc/error_constants.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h gcc/libstdc++-v3/config/os/avrlibc/error_constants.h
 --- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/os/avrlibc/error_constants.h	2024-05-25 11:27:05.784778219 -0700
++++ gcc/libstdc++-v3/config/os/avrlibc/error_constants.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,180 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1857,9 +1870,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +} // namespace
 +
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h gcc-new/libstdc++-v3/config/os/avrlibc/os_defines.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h gcc/libstdc++-v3/config/os/avrlibc/os_defines.h
 --- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/config/os/avrlibc/os_defines.h	2024-05-25 11:27:05.784778219 -0700
++++ gcc/libstdc++-v3/config/os/avrlibc/os_defines.h	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,41 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1902,9 +1915,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +#define _GLIBCXX_GTHREAD_USE_WEAK 0
 +
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc gcc-new/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc gcc/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
 --- gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2024-05-25 11:21:25.844753989 -0700
++++ gcc/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2024-07-06 18:54:13.811713418 -0700
 @@ -40,7 +40,7 @@
  
    const ctype_base::mask*
@@ -1914,9 +1927,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  
    ctype<char>::ctype(__c_locale, const mask* __table, bool __del,
  		     size_t __refs)
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/crossconfig.m4 gcc-new/libstdc++-v3/crossconfig.m4
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/crossconfig.m4 gcc/libstdc++-v3/crossconfig.m4
 --- gcc-13.2.0/libstdc++-v3/crossconfig.m4	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/crossconfig.m4	2024-05-25 11:23:13.494759022 -0700
++++ gcc/libstdc++-v3/crossconfig.m4	2024-07-06 18:54:13.811713418 -0700
 @@ -33,6 +33,29 @@
      AC_DEFINE(HAVE_SINHF)
      AC_DEFINE(HAVE_TANF)
@@ -1947,9 +1960,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
      ;;
  
    mips*-sde-elf*)
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/include/c_global/cmath gcc-new/libstdc++-v3/include/c_global/cmath
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/include/c_global/cmath gcc/libstdc++-v3/include/c_global/cmath
 --- gcc-13.2.0/libstdc++-v3/include/c_global/cmath	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/include/c_global/cmath	2024-07-05 12:47:25.081293553 -0700
++++ gcc/libstdc++-v3/include/c_global/cmath	2024-07-06 18:54:13.811713418 -0700
 @@ -83,6 +83,7 @@
  _GLIBCXX_BEGIN_NAMESPACE_VERSION
  
@@ -1958,9 +1971,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  
  #ifndef __CORRECT_ISO_CPP_MATH_H_PROTO
    inline _GLIBCXX_CONSTEXPR float
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc gcc-new/libstdc++-v3/libsupc++/eh_avr.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc gcc/libstdc++-v3/libsupc++/eh_avr.cc
 --- gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-new/libstdc++-v3/libsupc++/eh_avr.cc	2024-07-06 08:48:04.814443897 -0700
++++ gcc/libstdc++-v3/libsupc++/eh_avr.cc	2024-07-06 18:54:13.811713418 -0700
 @@ -0,0 +1,169 @@
 +#ifdef __AVR_ARCH__
 +
@@ -2131,9 +2144,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
 +
 +}
 +#endif
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc gcc-new/libstdc++-v3/libsupc++/eh_personality.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc gcc/libstdc++-v3/libsupc++/eh_personality.cc
 --- gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/libsupc++/eh_personality.cc	2024-07-03 07:23:08.107411866 -0700
++++ gcc/libstdc++-v3/libsupc++/eh_personality.cc	2024-07-06 18:54:13.811713418 -0700
 @@ -333,406 +333,6 @@
  namespace __cxxabiv1
  {
@@ -2541,9 +2554,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  /* The ARM EABI implementation of __cxa_call_unexpected is in a
     different file so that the personality routine (PR) can be used
     standalone.  The generic routine shared datastructures with the PR
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.am gcc-new/libstdc++-v3/libsupc++/Makefile.am
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.am gcc/libstdc++-v3/libsupc++/Makefile.am
 --- gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.am	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/libsupc++/Makefile.am	2024-06-29 08:24:35.054382501 -0700
++++ gcc/libstdc++-v3/libsupc++/Makefile.am	2024-07-06 18:54:13.811713418 -0700
 @@ -65,6 +65,7 @@
  	eh_alloc.cc \
  	eh_arm.cc \
@@ -2552,9 +2565,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  	eh_call.cc \
  	eh_catch.cc \
  	eh_exception.cc \
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.in gcc-new/libstdc++-v3/libsupc++/Makefile.in
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.in gcc/libstdc++-v3/libsupc++/Makefile.in
 --- gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.in	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/libsupc++/Makefile.in	2024-06-28 18:41:43.556778759 -0700
++++ gcc/libstdc++-v3/libsupc++/Makefile.in	2024-07-06 18:54:13.811713418 -0700
 @@ -155,7 +155,7 @@
  	atomicity.lo bad_alloc.lo bad_array_length.lo bad_array_new.lo \
  	bad_cast.lo bad_typeid.lo class_type_info.lo del_op.lo \
@@ -2572,9 +2585,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc
  	eh_call.cc \
  	eh_catch.cc \
  	eh_exception.cc \
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc gcc-new/libstdc++-v3/src/c++98/math_stubs_long_double.cc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc gcc/libstdc++-v3/src/c++98/math_stubs_long_double.cc
 --- gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc-new/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2024-05-25 14:06:09.387714200 -0700
++++ gcc/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2024-07-06 18:54:13.821713416 -0700
 @@ -30,195 +30,195 @@
  
  extern "C"

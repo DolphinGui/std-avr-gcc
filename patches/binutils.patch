@@ -1,6 +1,6 @@
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/autom4te.cache/traces.0t binutils-new/autom4te.cache/traces.0t
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN binutils-2.42/autom4te.cache/traces.0t binutils/autom4te.cache/traces.0t
 --- binutils-2.42/autom4te.cache/traces.0t	1969-12-31 16:00:00.000000000 -0800
-+++ binutils-new/autom4te.cache/traces.0t	2024-07-02 10:41:12.665646502 -0700
++++ binutils/autom4te.cache/traces.0t	2024-07-02 10:41:12.665646502 -0700
 @@ -0,0 +1,163 @@
 +m4trace:configure.ac:22: -1- m4_include([config/acx.m4])
 +m4trace:configure.ac:23: -1- m4_include([config/override.m4])
@@ -165,9 +165,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +m4trace:configure.ac:35: -1- AC_SUBST([target_alias])
 +m4trace:configure.ac:35: -1- AC_SUBST_TRACE([target_alias])
 +m4trace:configure.ac:35: -1- m4_pattern_allow([^target_alias$])
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/gas/config/tc-arm.c binutils-new/gas/config/tc-arm.c
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN binutils-2.42/gas/config/tc-arm.c binutils/gas/config/tc-arm.c
 --- binutils-2.42/gas/config/tc-arm.c	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/gas/config/tc-arm.c	2024-07-03 10:01:53.296710411 -0700
++++ binutils/gas/config/tc-arm.c	2024-07-03 10:01:53.296710411 -0700
 @@ -27793,29 +27793,29 @@
    start_unwind_section (now_seg, 0);
  
@@ -246,9 +246,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
    else
      {
        /* PR 16765: Missing or misplaced unwind directives can trigger this.  */
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/gas/config/tc-avr.c binutils-new/gas/config/tc-avr.c
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN binutils-2.42/gas/config/tc-avr.c binutils/gas/config/tc-avr.c
 --- binutils-2.42/gas/config/tc-avr.c	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/gas/config/tc-avr.c	2024-07-07 07:02:05.726824940 -0700
++++ binutils/gas/config/tc-avr.c	2024-07-11 14:13:51.322316434 -0700
 @@ -28,6 +28,9 @@
  #include "elf/avr.h"
  #include "elf32-avr.h"
@@ -297,7 +297,7 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
  #define LDI_IMMEDIATE(x) (((x) & 0xf) | (((x) << 4) & 0xf00))
  
  #define EXP_MOD_NAME(i)       exp_mod[i].name
-@@ -2846,3 +2873,429 @@
+@@ -2846,3 +2873,431 @@
  
    return true;
  }
@@ -535,6 +535,8 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +static void
 +s_avr_unwind_save (int ignored ATTRIBUTE_UNUSED)
 +{
++  if(unwind.cant_unwind)
++    return;
 +  int reg;
 +
 +  flush_pending_unwind();
@@ -727,9 +729,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
 +  unwind.proc_start = NULL;
 +}
 +
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/include/elf/avr.h binutils-new/include/elf/avr.h
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN binutils-2.42/include/elf/avr.h binutils/include/elf/avr.h
 --- binutils-2.42/include/elf/avr.h	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/include/elf/avr.h	2024-07-01 15:28:31.540229137 -0700
++++ binutils/include/elf/avr.h	2024-07-01 15:28:31.540229137 -0700
 @@ -49,6 +49,13 @@
  #define E_AVR_MACH_XMEGA6  106
  #define E_AVR_MACH_XMEGA7  107
@@ -744,9 +746,9 @@ diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' bin
  /* Relocations.  */
  START_RELOC_NUMBERS (elf_avr_reloc_type)
       RELOC_NUMBER (R_AVR_NONE,			0)
-diff -ruN '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' binutils-2.42/ld/scripttempl/avr.sc binutils-new/ld/scripttempl/avr.sc
+diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN binutils-2.42/ld/scripttempl/avr.sc binutils/ld/scripttempl/avr.sc
 --- binutils-2.42/ld/scripttempl/avr.sc	2024-01-28 16:00:00.000000000 -0800
-+++ binutils-new/ld/scripttempl/avr.sc	2024-07-07 08:40:27.086384089 -0700
++++ binutils/ld/scripttempl/avr.sc	2024-07-07 08:40:27.086384089 -0700
 @@ -206,7 +206,6 @@
      *libc.a:*(.progmem.data)
  

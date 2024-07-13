@@ -17,8 +17,8 @@ make install -j -l 4
 cd ..
 }
 
-export CFLAGS='-fexceptions -Oz -ffunction-sections -fdata-sections'
-export CXXFLAGS='-fexceptions -frtti -Oz -ffunction-sections -fdata-sections'
+export CFLAGS='-Oz -ffunction-sections -fdata-sections'
+export CXXFLAGS='-Oz -ffunction-sections -fdata-sections'
 
 if [ -n "$HOSTFLAG" ]; then
 ARGS="$HOSTFLAG --prefix=/usr/$HOST --enable-static --disable-shared"
@@ -34,8 +34,7 @@ export PATH=$PREFIX/bin:$PATH
 if ! type avr-gcc; then
 confbuild gcc \
     "--prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls \
-    --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --program-prefix=avr- --with-specs=%{!frtti:%{!frtti:-frtti}}% \
-    --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
+    --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --program-prefix=avr-"
 fi
 
 # c compiler needs to be chnaged to avr compiler temporarily
@@ -52,6 +51,4 @@ confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
   --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions \
   --with-dwarf2 --with-avrlibc --disable-__cxa_atexit  --disable-threads --disable-shared \
   --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool  \
- --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 \
- --with-specs=%{!frtti:%{!frtti:-frtti}} \
- --with-specs=%{!fexceptions:%{!fexceptions:-fexceptions}}"
+ --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2"
