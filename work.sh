@@ -12,7 +12,7 @@ mv $DIR $2
 fi
 }
 
-get https://github.com/DolphinGui/avr-libc/releases/download/main-2/avr-libc.tar.xz
+get https://github.com/DolphinGui/avr-libc/releases/download/main-3/avr-libc.tar.xz
 get https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz binutils
 get https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz gmp
 get https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz mpfr
