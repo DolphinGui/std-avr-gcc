@@ -16,7 +16,9 @@ jobs:
         patch libstdc++6 rsync git meson ninja-build
 
     - name: Get ct-ng hash
-      run: echo "CTNG_HASH=`git ls-remote https://github.com/DolphinGui/crosstool-ng.git refs/heads/avr-exceptions | awk '{print $1;}'`" >> "$GITHUB_ENV"
+      id: ct-hash
+      run: 
+        echo "hash=`git ls-remote https://github.com/DolphinGui/crosstool-ng.git refs/heads/avr-exceptions | awk '{print $1;}'`" >> "$GITHUB_OUTPUT"
 
     - name: Cache crosstool-NG
       id: ct-cache
@@ -26,21 +28,32 @@ jobs:
           ./ctroot
           ./crosstool-ng
           ./ctbuild
-        key: ${{ env.CTNG_HASH }}
+        key: ${{ steps.ct-hash.outputs.hash }}
 
     - name: Get crosstool-NG
       if: ${{ steps.ct-cache.outputs.cache-hit != 'true' }}
-      run: ./.github/scripts/ct-ng.sh
+      run: .github/scripts/ct-ng.sh
       
     - name: Append ct-ng to path
       run: echo `realpath ./ctroot/bin` >> "$GITHUB_PATH"
 
     
     - name: Calculate dependency hashes
-      run: echo "CTNG_HASH=`git ls-remote https://github.com/DolphinGui/crosstool-ng.git refs/heads/avr-exceptions | awk '{print $1;}'`" >> "$GITHUB_ENV"
+      id: dep-hash
+      run: .github/scripts/hash-deps.sh >> "$GITHUB_OUTPUT"
+
+  
+    - name: Cache linux build
+      id: linux-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ./linux-build/root
+        key: ${{ steps.dep-hash.outputs.hash }}
 
     - name: Build linux
-      run: ./.github/scripts/build-linux.sh
+      if: ${{ steps.linux-cache.outputs.cache-hit != 'true' }}
+      run: .github/scripts/build-linux.sh
 
     - name: Upload logs
       if: ${{ always() }} # upload logs even on failure
