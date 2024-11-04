@@ -13,5 +13,4 @@ cd build
 make -j
 make install -j
 cd ..
-echo `realpath ../ctroot` >> "$GITHUB_PATH"
 
