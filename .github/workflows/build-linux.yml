@@ -8,6 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Install jq tool
+      run: |
+        sudo apt-get update
+        sudo apt-get install help2man
     - name: Get crosstool-NG
       run: ./.github/scripts/ct-ng.sh
     - name: Test path
