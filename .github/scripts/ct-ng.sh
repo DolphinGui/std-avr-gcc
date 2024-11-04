@@ -2,7 +2,7 @@
 
 set -ex
 
-git clone git@github.com:DolphinGui/crosstool-ng.git --depth=1
+git clone avr-exceptions https://github.com/DolphinGui/crosstool-ng.git --depth=1
 cd crosstool-ng
 ./bootstrap
 cd ..
