@@ -6,9 +6,9 @@ git clone -b avr-exceptions --single-branch https://github.com/DolphinGui/crosst
 cd crosstool-ng
 ./bootstrap
 cd ..
-mkdir build
+mkdir ctbuild
 mkdir ctroot
-cd build
+cd ctbuild
 ../crosstool-ng/configure --prefix=`realpath ../ctroot`
 make -j
 make install -j

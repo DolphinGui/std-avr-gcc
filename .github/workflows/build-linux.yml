@@ -14,14 +14,34 @@ jobs:
         sudo apt-get install gcc g++ gperf bison flex texinfo help2man make libncurses5-dev \
         python3-dev autoconf automake libtool libtool-bin gawk wget bzip2 xz-utils unzip \
         patch libstdc++6 rsync git meson ninja-build
+
+    - name: Get ct-ng hash
+      run: echo "CTNG_HASH=`git ls-remote https://github.com/DolphinGui/crosstool-ng.git refs/heads/avr-exceptions | awk '{print $1;}'`" >> "$GITHUB_ENV"
+
+    - name: Cache crosstool-NG
+      id: ct-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ./ctroot
+          ./crosstool-ng
+          ./ctbuild
+        key: ${{ env.CTNG_HASH }}
+
     - name: Get crosstool-NG
+      if: ${{ steps.ct-cache.outputs.cache-hit }}
       run: ./.github/scripts/ct-ng.sh
+      
     - name: Append ct-ng to path
       run: echo `realpath ./ctroot/bin` >> "$GITHUB_PATH"
-    - name: Test path
-      run: echo "$PATH"
+
+    
+    - name: Calculate dependency hashes
+      run: echo "CTNG_HASH=`git ls-remote https://github.com/DolphinGui/crosstool-ng.git refs/heads/avr-exceptions | awk '{print $1;}'`" >> "$GITHUB_ENV"
+
     - name: Build linux
       run: ./.github/scripts/build-linux.sh
+      
     - name: Upload archive
       uses: actions/upload-artifact@v4
       with:
