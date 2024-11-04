@@ -41,7 +41,14 @@ jobs:
 
     - name: Build linux
       run: ./.github/scripts/build-linux.sh
-      
+
+    - name: Upload logs
+      if: ${{ always() }} # upload logs even on failure
+      uses: actions/upload-artifact@v4
+      with:
+        name: build.log
+        path: linux-build/build.log
+
     - name: Upload archive
       uses: actions/upload-artifact@v4
       with:
