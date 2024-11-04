@@ -17,7 +17,7 @@ jobs:
     - name: Get crosstool-NG
       run: ./.github/scripts/ct-ng.sh
     - name: Append ct-ng to path
-      run: echo `realpath ./ctroot` >> "$GITHUB_PATH"
+      run: echo `realpath ./ctroot/bin` >> "$GITHUB_PATH"
     - name: Test path
       run: echo "$PATH"
     - name: Build linux
