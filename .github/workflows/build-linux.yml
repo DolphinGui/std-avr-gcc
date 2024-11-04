@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Install jq tool
+    - name: Install crosstool-NG dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install help2man
+        sudo apt-get install gcc g++ gperf bison flex texinfo help2man make libncurses5-dev \
+        python3-dev autoconf automake libtool libtool-bin gawk wget bzip2 xz-utils unzip \
+        patch libstdc++6 rsync git meson ninja-build
     - name: Get crosstool-NG
       run: ./.github/scripts/ct-ng.sh
     - name: Test path
