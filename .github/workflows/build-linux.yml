@@ -29,7 +29,7 @@ jobs:
         key: ${{ env.CTNG_HASH }}
 
     - name: Get crosstool-NG
-      if: ${{ steps.ct-cache.outputs.cache-hit }}
+      if: ${{ steps.ct-cache.outputs.cache-hit != 'true' }}
       run: ./.github/scripts/ct-ng.sh
       
     - name: Append ct-ng to path
