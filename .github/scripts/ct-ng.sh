@@ -2,7 +2,7 @@
 
 set -ex
 
-git clone git@github.com:DolphinGui/crosstool-ng.git --depth=0
+git clone git@github.com:DolphinGui/crosstool-ng.git --depth=1
 cd crosstool-ng
 ./bootstrap
 cd ..
