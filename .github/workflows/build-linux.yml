@@ -1,7 +1,6 @@
 name: Build toolchain for linux
 on:
   workflow_dispatch:
-  push:
 
 jobs:
   build:
