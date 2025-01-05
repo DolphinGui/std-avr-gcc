@@ -1,11 +1,7 @@
 #!/usr/bin/sh
 
-apt-get update
-apt-get upgrade
-
-apt-get install docker-compose
-usermod -aG docker $USER
-systemctl start docker
+set -ex
 
 docker build -t avr-build .
-docker run -dit avr-build sh avr.sh
+CONTAINER=`docker run avr-build bash work.sh`
+docker cp $CONTAINER:/out out

@@ -1,7 +1,62 @@
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/common/config/avr/avr-common.cc gcc/gcc/common/config/avr/avr-common.cc
---- gcc-13.2.0/gcc/common/config/avr/avr-common.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/common/config/avr/avr-common.cc	2024-07-06 18:54:13.811713418 -0700
-@@ -141,6 +141,16 @@
+From 5fc0d82a98fb23a8e1c7a658b411e99ec3f45ca8 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sat, 2 Nov 2024 19:20:11 -0700
+Subject: [PATCH 1/8] move patches to 13.2.0 release instead of random release
+
+---
+ gcc/common/config/avr/avr-common.cc           |  12 +-
+ gcc/config/avr/avr-protos.h                   |   5 +
+ gcc/config/avr/avr.cc                         | 278 ++++++++++++
+ gcc/config/avr/avr.h                          |  16 +-
+ gcc/config/avr/elf.h                          |  14 +-
+ gcc/config/avr/specs.h                        |   5 +-
+ libgcc/config/avr/fae.h                       |  93 ++++
+ libgcc/config/avr/t-avr                       |   2 +
+ libgcc/config/avr/unwind-avr-sup.c            |  40 ++
+ libgcc/config/avr/unwind-avr.S                | 243 +++++++++++
+ libstdc++-v3/config/cpu/avr/atomic_word.h     |  40 ++
+ .../cpu/avr/atomicity_builtins/atomicity.h    |  44 ++
+ .../cpu/avr/atomicity_mutex/atomicity.h       |  59 +++
+ libstdc++-v3/config/cpu/avr/cpu_defines.h     |  33 ++
+ libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h   |  59 +++
+ .../config/cpu/avr/opt/bits/opt_random.h      |  38 ++
+ .../config/cpu/avr/opt/ext/opt_random.h       |  38 ++
+ libstdc++-v3/config/os/avrlibc/ctype_base.h   |  59 +++
+ .../config/os/avrlibc/ctype_configure_char.cc |  99 +++++
+ libstdc++-v3/config/os/avrlibc/ctype_inline.h | 173 ++++++++
+ .../config/os/avrlibc/error_constants.h       | 180 ++++++++
+ libstdc++-v3/config/os/avrlibc/os_defines.h   |  41 ++
+ .../config/os/newlib/ctype_configure_char.cc  |   2 +-
+ libstdc++-v3/crossconfig.m4                   |  23 +
+ libstdc++-v3/include/c_global/cmath           |   1 +
+ libstdc++-v3/libsupc++/Makefile.am            |   1 +
+ libstdc++-v3/libsupc++/Makefile.in            |   3 +-
+ libstdc++-v3/libsupc++/eh_avr.cc              | 169 ++++++++
+ libstdc++-v3/libsupc++/eh_personality.cc      | 400 ------------------
+ .../src/c++98/math_stubs_long_double.cc       | 382 ++++++++---------
+ 30 files changed, 1951 insertions(+), 601 deletions(-)
+ create mode 100644 libgcc/config/avr/fae.h
+ create mode 100644 libgcc/config/avr/unwind-avr-sup.c
+ create mode 100644 libgcc/config/avr/unwind-avr.S
+ create mode 100644 libstdc++-v3/config/cpu/avr/atomic_word.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/cpu_defines.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
+ create mode 100644 libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
+ create mode 100644 libstdc++-v3/config/os/avrlibc/ctype_base.h
+ create mode 100644 libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
+ create mode 100644 libstdc++-v3/config/os/avrlibc/ctype_inline.h
+ create mode 100644 libstdc++-v3/config/os/avrlibc/error_constants.h
+ create mode 100644 libstdc++-v3/config/os/avrlibc/os_defines.h
+ create mode 100644 libstdc++-v3/libsupc++/eh_avr.cc
+
+diff --git a/gcc/common/config/avr/avr-common.cc b/gcc/common/config/avr/avr-common.cc
+index 2f874c5b81c..1eaedfbfaa7 100644
+--- a/gcc/common/config/avr/avr-common.cc
++++ b/gcc/common/config/avr/avr-common.cc
+@@ -135,6 +135,16 @@ avr_handle_option (struct gcc_options *opts, struct gcc_options*,
  }
  
  
@@ -18,7 +73,7 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  #undef TARGET_HANDLE_OPTION
  #define TARGET_HANDLE_OPTION avr_handle_option
  
-@@ -148,6 +158,6 @@
+@@ -142,6 +152,6 @@ avr_handle_option (struct gcc_options *opts, struct gcc_options*,
  #define TARGET_OPTION_OPTIMIZATION_TABLE avr_option_optimization_table
  
  #undef TARGET_EXCEPT_UNWIND_INFO
@@ -26,10 +81,34 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +#define TARGET_EXCEPT_UNWIND_INFO avr_except_unwind_info
  
  struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr.cc gcc/gcc/config/avr/avr.cc
---- gcc-13.2.0/gcc/config/avr/avr.cc	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/config/avr/avr.cc	2024-07-11 14:15:35.722307483 -0700
-@@ -1467,6 +1467,271 @@
+diff --git a/gcc/config/avr/avr-protos.h b/gcc/config/avr/avr-protos.h
+index cf45a8c4499..242946b87a4 100644
+--- a/gcc/config/avr/avr-protos.h
++++ b/gcc/config/avr/avr-protos.h
+@@ -32,6 +32,10 @@ extern rtx avr_return_addr_rtx (int count, rtx tem);
+ extern void avr_register_target_pragmas (void);
+ extern void avr_init_expanders (void);
+ 
++extern void avr_asm_declare_function_name (FILE *, const char *, tree);
++extern void avr_output_fn_unwind (FILE *, bool prologue);
++extern enum unwind_info_type avr_except_unwind_info (struct gcc_options *opts);
++
+ #ifdef TREE_CODE
+ extern void avr_asm_output_aligned_decl_common (FILE*, tree, const char*, unsigned HOST_WIDE_INT, unsigned int, bool);
+ extern void avr_asm_asm_output_aligned_bss (FILE *, tree, const char *, unsigned HOST_WIDE_INT, int, void (*) (FILE *, tree, const char *, unsigned HOST_WIDE_INT, int));
+@@ -84,6 +88,7 @@ extern rtx avr_to_int_mode (rtx);
+ 
+ extern void avr_expand_prologue (void);
+ extern void avr_expand_epilogue (bool);
++extern rtx avr_eh_return_handler_rtx (void);
+ extern bool avr_emit_cpymemhi (rtx*);
+ extern int avr_epilogue_uses (int regno);
+ 
+diff --git a/gcc/config/avr/avr.cc b/gcc/config/avr/avr.cc
+index a5c628134b4..488e52f6a5d 100644
+--- a/gcc/config/avr/avr.cc
++++ b/gcc/config/avr/avr.cc
+@@ -1490,6 +1490,271 @@ avr_set_current_function (tree decl)
  }
  
  
@@ -301,20 +380,7 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  /* Implement `ACCUMULATE_OUTGOING_ARGS'.  */
  
  int
-@@ -10725,6 +10990,12 @@
-     readonly_data_section->unnamed.callback = avr_output_data_section_asm_op;
-   data_section->unnamed.callback = avr_output_data_section_asm_op;
-   bss_section->unnamed.callback = avr_output_bss_section_asm_op;
-+
-+  /* insert .handlerdata and personality directive */
-+  exception_section = get_unnamed_section (0, output_section_asm_op,
-+             "\t.personality __avr_cxx_personality\n"
-+             "\t.section .gcc_except_table,\"a\",@progbits\n"
-+             "\t.handlerdata");
- }
- 
- 
-@@ -13521,6 +13792,16 @@
+@@ -13638,6 +13903,16 @@ avr_convert_to_type (tree type, tree expr)
    return NULL_TREE;
  }
  
@@ -331,9 +397,9 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  
  /* Implement `TARGET_LEGITIMATE_COMBINED_INSN'.  */
  
-@@ -15119,6 +15400,9 @@
- #undef  TARGET_ADDR_SPACE_DIAGNOSE_USAGE
- #define TARGET_ADDR_SPACE_DIAGNOSE_USAGE avr_addr_space_diagnose_usage
+@@ -15239,6 +15514,9 @@ avr_float_lib_compare_returns_bool (machine_mode mode, enum rtx_code)
+ #undef  TARGET_ADDR_SPACE_ZERO_ADDRESS_VALID
+ #define TARGET_ADDR_SPACE_ZERO_ADDRESS_VALID avr_addr_space_zero_address_valid
  
 +#undef TARGET_ASM_UNWIND_EMIT
 +#define TARGET_ASM_UNWIND_EMIT avr_unwind_emit
@@ -341,10 +407,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  #undef  TARGET_MODE_DEPENDENT_ADDRESS_P
  #define TARGET_MODE_DEPENDENT_ADDRESS_P avr_mode_dependent_address_p
  
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr.h gcc/gcc/config/avr/avr.h
---- gcc-13.2.0/gcc/config/avr/avr.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/config/avr/avr.h	2024-07-06 18:54:13.811713418 -0700
-@@ -386,6 +386,8 @@
+diff --git a/gcc/config/avr/avr.h b/gcc/config/avr/avr.h
+index 9939ab6ee77..3c5da955dd8 100644
+--- a/gcc/config/avr/avr.h
++++ b/gcc/config/avr/avr.h
+@@ -387,6 +387,8 @@ typedef struct avr_args
     There are no shared libraries on this target, and these sections are
     placed in the read-only program memory, so they are not writable.  */
  
@@ -353,7 +420,7 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  #undef CTORS_SECTION_ASM_OP
  #define CTORS_SECTION_ASM_OP "\t.section .ctors,\"a\",@progbits"
  
-@@ -514,9 +516,6 @@
+@@ -517,9 +519,6 @@ extern const char *avr_no_devlib (int, const char**);
    " %:double-lib(%{m*:m%*})"                            \
    " %:device-specs-file(device-specs%s %{mmcu=*:%*})"
  
@@ -363,7 +430,7 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  /* This is the default without any -mmcu=* option.  */
  #define MULTILIB_DEFAULTS { "mmcu=" AVR_MMCU_DEFAULT }
  
-@@ -525,8 +524,19 @@
+@@ -528,8 +527,19 @@ extern const char *avr_no_devlib (int, const char**);
  
  #define CR_TAB "\n\t"
  
@@ -383,31 +450,10 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  #define INCOMING_RETURN_ADDR_RTX   avr_incoming_return_addr_rtx ()
  #define INCOMING_FRAME_SP_OFFSET   (AVR_3_BYTE_PC ? 3 : 2)
  
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/avr-protos.h gcc/gcc/config/avr/avr-protos.h
---- gcc-13.2.0/gcc/config/avr/avr-protos.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/config/avr/avr-protos.h	2024-07-06 18:54:13.811713418 -0700
-@@ -32,6 +32,10 @@
- extern void avr_register_target_pragmas (void);
- extern void avr_init_expanders (void);
- 
-+extern void avr_asm_declare_function_name (FILE *, const char *, tree);
-+extern void avr_output_fn_unwind (FILE *, bool prologue);
-+extern enum unwind_info_type avr_except_unwind_info (struct gcc_options *opts);
-+
- #ifdef TREE_CODE
- extern void avr_asm_output_aligned_decl_common (FILE*, tree, const char*, unsigned HOST_WIDE_INT, unsigned int, bool);
- extern void avr_asm_asm_output_aligned_bss (FILE *, tree, const char *, unsigned HOST_WIDE_INT, int, void (*) (FILE *, tree, const char *, unsigned HOST_WIDE_INT, int));
-@@ -84,6 +88,7 @@
- 
- extern void avr_expand_prologue (void);
- extern void avr_expand_epilogue (bool);
-+extern rtx avr_eh_return_handler_rtx (void);
- extern bool avr_emit_cpymemhi (rtx*);
- extern int avr_epilogue_uses (int regno);
- 
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/elf.h gcc/gcc/config/avr/elf.h
---- gcc-13.2.0/gcc/config/avr/elf.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/config/avr/elf.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/gcc/config/avr/elf.h b/gcc/config/avr/elf.h
+index 86be435319e..0d1d3b3b36c 100644
+--- a/gcc/config/avr/elf.h
++++ b/gcc/config/avr/elf.h
 @@ -28,6 +28,16 @@
  #undef STRING_LIMIT
  #define STRING_LIMIT ((unsigned) 64)
@@ -427,10 +473,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 -#undef INIT_SECTION_ASM_OP
 -#undef FINI_SECTION_ASM_OP
 +
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/gcc/config/avr/specs.h gcc/gcc/config/avr/specs.h
---- gcc-13.2.0/gcc/config/avr/specs.h	2023-07-27 01:13:04.000000000 -0700
-+++ gcc/gcc/config/avr/specs.h	2024-07-11 14:17:49.902304394 -0700
-@@ -40,9 +40,9 @@
+diff --git a/gcc/config/avr/specs.h b/gcc/config/avr/specs.h
+index b4a5ee6e5fc..1a4fdb9c0b5 100644
+--- a/gcc/config/avr/specs.h
++++ b/gcc/config/avr/specs.h
+@@ -40,9 +40,9 @@ along with GCC; see the file COPYING3.  If not see
  #undef  CC1PLUS_SPEC
  #define CC1PLUS_SPEC                                    \
    "%(cc1) "                                             \
@@ -442,14 +489,16 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  
  #define ASM_RELAX_SPEC                          \
    "%{mrelax:--mlink-relax} "
-@@ -78,3 +78,4 @@
+@@ -78,3 +78,4 @@ along with GCC; see the file COPYING3.  If not see
  
  #define STARTFILE_SPEC ""
  #define ENDFILE_SPEC ""
 +
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/fae.h gcc/libgcc/config/avr/fae.h
---- gcc-13.2.0/libgcc/config/avr/fae.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libgcc/config/avr/fae.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libgcc/config/avr/fae.h b/libgcc/config/avr/fae.h
+new file mode 100644
+index 00000000000..78274630fd5
+--- /dev/null
++++ b/libgcc/config/avr/fae.h
 @@ -0,0 +1,93 @@
 +#pragma once
 +
@@ -544,18 +593,67 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +
 +table_data __fae_get_ptr(void *except, uint16_t pc);
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/t-avr gcc/libgcc/config/avr/t-avr
---- gcc-13.2.0/libgcc/config/avr/t-avr	2023-07-27 01:13:07.000000000 -0700
-+++ gcc/libgcc/config/avr/t-avr	2024-07-06 18:54:13.811713418 -0700
-@@ -294,3 +294,5 @@
+diff --git a/libgcc/config/avr/t-avr b/libgcc/config/avr/t-avr
+index ed84b3f342e..0335608a4bb 100644
+--- a/libgcc/config/avr/t-avr
++++ b/libgcc/config/avr/t-avr
+@@ -294,3 +294,5 @@ LIB2FUNCS_EXCLUDE += \
  LIB2FUNCS_EXCLUDE += \
  	$(foreach func,_ssmul,\
  	$(foreach mode,$(ssmul_modes),$(func_X)))
 +
 +LIB2ADDEH = $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/unwind-avr.S gcc/libgcc/config/avr/unwind-avr.S
---- gcc-13.2.0/libgcc/config/avr/unwind-avr.S	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libgcc/config/avr/unwind-avr.S	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libgcc/config/avr/unwind-avr-sup.c b/libgcc/config/avr/unwind-avr-sup.c
+new file mode 100644
+index 00000000000..694d684b879
+--- /dev/null
++++ b/libgcc/config/avr/unwind-avr-sup.c
+@@ -0,0 +1,40 @@
++#include "fae.h"
++
++extern prog_byte __fae_table_start[];
++extern prog_byte __fae_table_stop[];
++
++typedef const table_entry_t __maybe_flash * table_ptr;
++
++void __avr_terminate() __attribute__((noreturn));
++// no plans to implement forced unwinding
++void _Unwind_ForcedUnwind() { __avr_terminate(); }
++
++// returns data pointer for pc entry. If no entry is found, return 0
++table_data __fae_get_ptr(void *except, uint16_t pc) {
++  table_data result;
++  result.type_index = 0xff;
++
++  for (table_ptr ptr = __fae_table_start; ptr < __fae_table_stop; ptr++) {
++    if (ptr->pc_begin < pc && pc <= ptr->pc_end) {
++      result.data = ptr->data;
++      result.data_end = ptr->data + ptr->length;
++      result.fp_register = ptr->frame_reg;
++      if (ptr->lsda != 0) {
++        personality_out out = {};
++        result.type_index =
++            ptr->personality(ptr->lsda, (pc - ptr->pc_begin) * 2,
++                        except, &out);
++        result.landing_pad = out.landing_pad;
++        if (result.landing_pad == 0) {
++          result.type_index = 0xff;
++          return result;
++        }
++        result.landing_pad += ptr->pc_begin * 2;
++        result.landing_pad >>= 1;
++      }
++      return result;
++    }
++  }
++  result.data = 0;
++  return result;
++}
+diff --git a/libgcc/config/avr/unwind-avr.S b/libgcc/config/avr/unwind-avr.S
+new file mode 100644
+index 00000000000..62a3660e429
+--- /dev/null
++++ b/libgcc/config/avr/unwind-avr.S
 @@ -0,0 +1,243 @@
 +.file	"unwind-avr.S"
 +
@@ -801,212 +899,57 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +#endif
 \ No newline at end of file
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c gcc/libgcc/config/avr/unwind-avr-sup.c
---- gcc-13.2.0/libgcc/config/avr/unwind-avr-sup.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libgcc/config/avr/unwind-avr-sup.c	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/atomic_word.h b/libstdc++-v3/config/cpu/avr/atomic_word.h
+new file mode 100644
+index 00000000000..301b99220b2
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/atomic_word.h
 @@ -0,0 +1,40 @@
-+#include "fae.h"
++// Low-level type for atomic operations -*- C++ -*-
 +
-+extern prog_byte __fae_table_start[];
-+extern prog_byte __fae_table_stop[];
++// Copyright (C) 2004-2023 Free Software Foundation, Inc.
++//
++// This file is part of the GNU ISO C++ Library.  This library is free
++// software; you can redistribute it and/or modify it under the
++// terms of the GNU General Public License as published by the
++// Free Software Foundation; either version 3, or (at your option)
++// any later version.
 +
-+typedef const table_entry_t __maybe_flash * table_ptr;
++// This library is distributed in the hope that it will be useful,
++// but WITHOUT ANY WARRANTY; without even the implied warranty of
++// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++// GNU General Public License for more details.
 +
-+void __avr_terminate() __attribute__((noreturn));
-+// no plans to implement forced unwinding
-+void _Unwind_ForcedUnwind() { __avr_terminate(); }
++// Under Section 7 of GPL version 3, you are granted additional
++// permissions described in the GCC Runtime Library Exception, version
++// 3.1, as published by the Free Software Foundation.
 +
-+// returns data pointer for pc entry. If no entry is found, return 0
-+table_data __fae_get_ptr(void *except, uint16_t pc) {
-+  table_data result;
-+  result.type_index = 0xff;
++// You should have received a copy of the GNU General Public License and
++// a copy of the GCC Runtime Library Exception along with this program;
++// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
++// <http://www.gnu.org/licenses/>.
 +
-+  for (table_ptr ptr = __fae_table_start; ptr < __fae_table_stop; ptr++) {
-+    if (ptr->pc_begin < pc && pc <= ptr->pc_end) {
-+      result.data = ptr->data;
-+      result.data_end = ptr->data + ptr->length;
-+      result.fp_register = ptr->frame_reg;
-+      if (ptr->lsda != 0) {
-+        personality_out out = {};
-+        result.type_index =
-+            ptr->personality(ptr->lsda, (pc - ptr->pc_begin) * 2,
-+                        except, &out);
-+        result.landing_pad = out.landing_pad;
-+        if (result.landing_pad == 0) {
-+          result.type_index = 0xff;
-+          return result;
-+        }
-+        result.landing_pad += ptr->pc_begin * 2;
-+        result.landing_pad >>= 1;
-+      }
-+      return result;
-+    }
-+  }
-+  result.data = 0;
-+  return result;
-+}
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-dw2.c gcc/libgcc/unwind-dw2.c
---- gcc-13.2.0/libgcc/unwind-dw2.c	2023-07-27 01:13:07.000000000 -0700
-+++ gcc/libgcc/unwind-dw2.c	2024-07-06 18:54:13.811713418 -0700
-@@ -974,10 +974,6 @@
- 		     struct _Unwind_Context *context,
- 		     _Unwind_FrameState *fs)
- {
--  if (fs->data_align == __LIBGCC_DWARF_CIE_DATA_ALIGNMENT__
--      && fs->code_align == 1)
--    execute_cfa_program_specialized (insn_ptr, insn_end, context, fs);
--  else
-     execute_cfa_program_generic (insn_ptr, insn_end, context, fs);
- }
- 
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-generic.h gcc/libgcc/unwind-generic.h
---- gcc-13.2.0/libgcc/unwind-generic.h	2023-07-27 01:13:07.000000000 -0700
-+++ gcc/libgcc/unwind-generic.h	2024-07-06 18:54:13.811713418 -0700
-@@ -130,7 +130,7 @@
- 
- /* Raise an exception, passing along the given exception object.  */
- extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
--_Unwind_RaiseException (struct _Unwind_Exception *);
-+_Unwind_RaiseException (struct _Unwind_Exception *) __attribute__((weak));
- 
- /* Raise an exception for forced unwinding.  */
- 
-@@ -138,16 +138,22 @@
-      (int, _Unwind_Action, _Unwind_Exception_Class,
-       struct _Unwind_Exception *, struct _Unwind_Context *, void *);
- 
--extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
-+ __attribute__((weak)) extern _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
- _Unwind_ForcedUnwind (struct _Unwind_Exception *, _Unwind_Stop_Fn, void *);
- 
- /* Helper to invoke the exception_cleanup routine.  */
--extern void _Unwind_DeleteException (struct _Unwind_Exception *);
-+inline void
-+_Unwind_DeleteException (struct _Unwind_Exception *exc)
-+{
-+  if (exc->exception_cleanup)
-+    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
-+}
++/** @file atomic_word.h
++ *  This file is a GNU extension to the Standard C++ Library.
++ */
 +
- 
- /* Resume propagation of an existing exception.  This is used after
-    e.g. executing cleanup code, and not to implement rethrowing.  */
- extern void LIBGCC2_UNWIND_ATTRIBUTE
--_Unwind_Resume (struct _Unwind_Exception *);
-+_Unwind_Resume (struct _Unwind_Exception *)  __attribute__((weak));
- 
- /* @@@ Resume propagation of a FORCE_UNWIND exception, or to rethrow
-    a normal exception that was handled.  */
-@@ -247,6 +253,10 @@
-    contains it.  */
- extern void * _Unwind_FindEnclosingFunction (void *pc);
- 
-+#ifndef __SIZEOF_INT__
-+  #error "__SIZEOF_INT__ macro not defined"
++#ifndef _GLIBCXX_ATOMIC_WORD_H
++#define _GLIBCXX_ATOMIC_WORD_H	1
++
++typedef int _Atomic_word;
++
++
++// This is a memory order acquire fence.
++#define _GLIBCXX_READ_MEM_BARRIER __atomic_thread_fence (__ATOMIC_ACQUIRE)
++// This is a memory order release fence.
++#define _GLIBCXX_WRITE_MEM_BARRIER __atomic_thread_fence (__ATOMIC_RELEASE)
++
 +#endif
-+
- #ifndef __SIZEOF_LONG__
-   #error "__SIZEOF_LONG__ macro not defined"
- #endif
-@@ -256,6 +266,7 @@
- #endif
- 
- 
-+
- /* leb128 type numbers have a potentially unlimited size.
-    The target of the following definitions of _sleb128_t and _uleb128_t
-    is to have efficient data types large enough to hold the leb128 type
-@@ -264,7 +275,10 @@
-    except when a unsigned long data type on the target machine is not
-    capable of storing a pointer.  */
- 
--#if __SIZEOF_LONG__ >= __SIZEOF_POINTER__
-+#if __SIZEOF_INT__ >= __SIZEOF_POINTER__
-+  typedef int _sleb128_t;
-+  typedef unsigned int _uleb128_t;
-+#elif __SIZEOF_LONG__ >= __SIZEOF_POINTER__
-   typedef long _sleb128_t;
-   typedef unsigned long _uleb128_t;
- #elif __SIZEOF_LONG_LONG__ >= __SIZEOF_POINTER__
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind.inc gcc/libgcc/unwind.inc
---- gcc-13.2.0/libgcc/unwind.inc	2023-07-27 01:13:07.000000000 -0700
-+++ gcc/libgcc/unwind.inc	2024-07-06 18:54:13.811713418 -0700
-@@ -82,8 +82,8 @@
- 
- /* Raise an exception, passing along the given exception object.  */
- 
--_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
--_Unwind_RaiseException(struct _Unwind_Exception *exc)
-+_Unwind_Reason_Code  LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
-+_Unwind_RaiseException(struct _Unwind_Exception *exc) 
- {
-   struct _Unwind_Context this_context, cur_context;
-   _Unwind_Reason_Code code;
-@@ -201,7 +201,7 @@
- 
- /* Raise an exception for forced unwinding.  */
- 
--_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
-+_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
- _Unwind_ForcedUnwind (struct _Unwind_Exception *exc,
- 		      _Unwind_Stop_Fn stop, void * stop_argument)
- {
-@@ -226,7 +226,7 @@
- /* Resume propagation of an existing exception.  This is used after
-    e.g. executing cleanup code, and not to implement rethrowing.  */
- 
--void LIBGCC2_UNWIND_ATTRIBUTE
-+void LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
- _Unwind_Resume (struct _Unwind_Exception *exc)
- {
-   struct _Unwind_Context this_context, cur_context;
-@@ -252,7 +252,7 @@
- /* Resume propagation of an FORCE_UNWIND exception, or to rethrow
-    a normal exception that was handled.  */
- 
--_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
-+_Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
- _Unwind_Resume_or_Rethrow (struct _Unwind_Exception *exc)
- {
-   struct _Unwind_Context this_context, cur_context;
-@@ -275,16 +275,6 @@
- }
- 
- 
--/* A convenience function that calls the exception_cleanup field.  */
--
--void
--_Unwind_DeleteException (struct _Unwind_Exception *exc)
--{
--  if (exc->exception_cleanup)
--    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
--}
--
--
- /* Perform stack backtrace through unwind data.  */
- 
- _Unwind_Reason_Code LIBGCC2_UNWIND_ATTRIBUTE
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libgcc/unwind-seh.c gcc/libgcc/unwind-seh.c
---- gcc-13.2.0/libgcc/unwind-seh.c	2023-07-27 01:13:07.000000000 -0700
-+++ gcc/libgcc/unwind-seh.c	2024-07-06 18:54:13.811713418 -0700
-@@ -419,14 +419,6 @@
-   return _Unwind_ForcedUnwind_Phase2 (exc);
- }
- 
--/* A convenience function that calls the exception_cleanup field.  */
--
--void
--_Unwind_DeleteException (struct _Unwind_Exception *exc)
--{
--  if (exc->exception_cleanup)
--    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
--}
- 
- /* Perform stack backtrace through unwind data.  */
- 
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h gcc/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h b/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
+new file mode 100644
+index 00000000000..016876b9281
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/atomicity_builtins/atomicity.h
 @@ -0,0 +1,44 @@
 +// Low-level functions for atomic operations: version for CPUs providing
 +// atomic builtins -*- C++ -*-
@@ -1052,9 +995,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h gcc/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h b/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
+new file mode 100644
+index 00000000000..33f16574aa6
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/atomicity_mutex/atomicity.h
 @@ -0,0 +1,59 @@
 +// Low-level functions for atomic operations: Generic version  -*- C++ -*-
 +
@@ -1115,53 +1060,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h gcc/libstdc++-v3/config/cpu/avr/atomic_word.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/atomic_word.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/atomic_word.h	2024-07-06 18:54:13.811713418 -0700
-@@ -0,0 +1,40 @@
-+// Low-level type for atomic operations -*- C++ -*-
-+
-+// Copyright (C) 2004-2023 Free Software Foundation, Inc.
-+//
-+// This file is part of the GNU ISO C++ Library.  This library is free
-+// software; you can redistribute it and/or modify it under the
-+// terms of the GNU General Public License as published by the
-+// Free Software Foundation; either version 3, or (at your option)
-+// any later version.
-+
-+// This library is distributed in the hope that it will be useful,
-+// but WITHOUT ANY WARRANTY; without even the implied warranty of
-+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+// GNU General Public License for more details.
-+
-+// Under Section 7 of GPL version 3, you are granted additional
-+// permissions described in the GCC Runtime Library Exception, version
-+// 3.1, as published by the Free Software Foundation.
-+
-+// You should have received a copy of the GNU General Public License and
-+// a copy of the GCC Runtime Library Exception along with this program;
-+// see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-+// <http://www.gnu.org/licenses/>.
-+
-+/** @file atomic_word.h
-+ *  This file is a GNU extension to the Standard C++ Library.
-+ */
-+
-+#ifndef _GLIBCXX_ATOMIC_WORD_H
-+#define _GLIBCXX_ATOMIC_WORD_H	1
-+
-+typedef int _Atomic_word;
-+
-+
-+// This is a memory order acquire fence.
-+#define _GLIBCXX_READ_MEM_BARRIER __atomic_thread_fence (__ATOMIC_ACQUIRE)
-+// This is a memory order release fence.
-+#define _GLIBCXX_WRITE_MEM_BARRIER __atomic_thread_fence (__ATOMIC_RELEASE)
-+
-+#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h gcc/libstdc++-v3/config/cpu/avr/cpu_defines.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cpu_defines.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/cpu_defines.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/cpu_defines.h b/libstdc++-v3/config/cpu/avr/cpu_defines.h
+new file mode 100644
+index 00000000000..95edb404359
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/cpu_defines.h
 @@ -0,0 +1,33 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1196,9 +1099,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +#define _GLIBCXX_CPU_DEFINES 1
 +
 +#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h gcc/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h b/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
+new file mode 100644
+index 00000000000..9d524386eb0
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/cxxabi_tweaks.h
 @@ -0,0 +1,59 @@
 +// Control various target specific ABI tweaks.  Generic version.
 +
@@ -1259,9 +1164,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +#endif
 +
 +#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h gcc/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h b/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
+new file mode 100644
+index 00000000000..c32e677f912
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/opt/bits/opt_random.h
 @@ -0,0 +1,38 @@
 +// Optimizations for random number handling, generic version -*- C++ -*-
 +
@@ -1301,9 +1208,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +
 +#endif // _BITS_OPT_RANDOM_H
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h gcc/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
---- gcc-13.2.0/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h b/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
+new file mode 100644
+index 00000000000..729e7b6d71b
+--- /dev/null
++++ b/libstdc++-v3/config/cpu/avr/opt/ext/opt_random.h
 @@ -0,0 +1,38 @@
 +// Optimizations for random number extensions, generic version -*- C++ -*-
 +
@@ -1343,9 +1252,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +
 +#endif // _EXT_OPT_RANDOM_H
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h gcc/libstdc++-v3/config/os/avrlibc/ctype_base.h
---- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_base.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/os/avrlibc/ctype_base.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/os/avrlibc/ctype_base.h b/libstdc++-v3/config/os/avrlibc/ctype_base.h
+new file mode 100644
+index 00000000000..b4fe105d441
+--- /dev/null
++++ b/libstdc++-v3/config/os/avrlibc/ctype_base.h
 @@ -0,0 +1,59 @@
 +// Locale support -*- C++ -*-
 +
@@ -1406,9 +1317,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc gcc/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
---- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc b/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
+new file mode 100644
+index 00000000000..8d1706d360a
+--- /dev/null
++++ b/libstdc++-v3/config/os/avrlibc/ctype_configure_char.cc
 @@ -0,0 +1,99 @@
 +// Locale support -*- C++ -*-
 +
@@ -1509,9 +1422,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h gcc/libstdc++-v3/config/os/avrlibc/ctype_inline.h
---- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/ctype_inline.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/os/avrlibc/ctype_inline.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/os/avrlibc/ctype_inline.h b/libstdc++-v3/config/os/avrlibc/ctype_inline.h
+new file mode 100644
+index 00000000000..07b66cf5951
+--- /dev/null
++++ b/libstdc++-v3/config/os/avrlibc/ctype_inline.h
 @@ -0,0 +1,173 @@
 +// Locale support -*- C++ -*-
 +
@@ -1686,9 +1601,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +_GLIBCXX_END_NAMESPACE_VERSION
 +} // namespace
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h gcc/libstdc++-v3/config/os/avrlibc/error_constants.h
---- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/error_constants.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/os/avrlibc/error_constants.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/os/avrlibc/error_constants.h b/libstdc++-v3/config/os/avrlibc/error_constants.h
+new file mode 100644
+index 00000000000..ba2795352bc
+--- /dev/null
++++ b/libstdc++-v3/config/os/avrlibc/error_constants.h
 @@ -0,0 +1,180 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1870,9 +1787,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +} // namespace
 +
 +#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h gcc/libstdc++-v3/config/os/avrlibc/os_defines.h
---- gcc-13.2.0/libstdc++-v3/config/os/avrlibc/os_defines.h	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/config/os/avrlibc/os_defines.h	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/config/os/avrlibc/os_defines.h b/libstdc++-v3/config/os/avrlibc/os_defines.h
+new file mode 100644
+index 00000000000..62c149d7032
+--- /dev/null
++++ b/libstdc++-v3/config/os/avrlibc/os_defines.h
 @@ -0,0 +1,41 @@
 +// Specific definitions for generic platforms  -*- C++ -*-
 +
@@ -1915,10 +1834,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +#define _GLIBCXX_GTHREAD_USE_WEAK 0
 +
 +#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc gcc/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
---- gcc-13.2.0/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/config/os/newlib/ctype_configure_char.cc	2024-07-06 18:54:13.811713418 -0700
-@@ -40,7 +40,7 @@
+diff --git a/libstdc++-v3/config/os/newlib/ctype_configure_char.cc b/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
+index 2f3727e5309..96404033687 100644
+--- a/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
++++ b/libstdc++-v3/config/os/newlib/ctype_configure_char.cc
+@@ -40,7 +40,7 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
  
    const ctype_base::mask*
    ctype<char>::classic_table() throw()
@@ -1927,10 +1847,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  
    ctype<char>::ctype(__c_locale, const mask* __table, bool __del,
  		     size_t __refs)
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/crossconfig.m4 gcc/libstdc++-v3/crossconfig.m4
---- gcc-13.2.0/libstdc++-v3/crossconfig.m4	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/crossconfig.m4	2024-07-06 18:54:13.811713418 -0700
-@@ -33,6 +33,29 @@
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index b3269cb88e0..f4d76ad9363 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -33,6 +33,29 @@ case "${host}" in
      AC_DEFINE(HAVE_SINHF)
      AC_DEFINE(HAVE_TANF)
      AC_DEFINE(HAVE_TANHF)
@@ -1960,10 +1881,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
      ;;
  
    mips*-sde-elf*)
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/include/c_global/cmath gcc/libstdc++-v3/include/c_global/cmath
---- gcc-13.2.0/libstdc++-v3/include/c_global/cmath	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/include/c_global/cmath	2024-07-06 18:54:13.811713418 -0700
-@@ -83,6 +83,7 @@
+diff --git a/libstdc++-v3/include/c_global/cmath b/libstdc++-v3/include/c_global/cmath
+index 992713b70da..a011fe0a2c7 100644
+--- a/libstdc++-v3/include/c_global/cmath
++++ b/libstdc++-v3/include/c_global/cmath
+@@ -83,6 +83,7 @@ namespace std _GLIBCXX_VISIBILITY(default)
  _GLIBCXX_BEGIN_NAMESPACE_VERSION
  
    using ::acos;
@@ -1971,9 +1893,44 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  
  #ifndef __CORRECT_ISO_CPP_MATH_H_PROTO
    inline _GLIBCXX_CONSTEXPR float
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc gcc/libstdc++-v3/libsupc++/eh_avr.cc
---- gcc-13.2.0/libstdc++-v3/libsupc++/eh_avr.cc	1969-12-31 16:00:00.000000000 -0800
-+++ gcc/libstdc++-v3/libsupc++/eh_avr.cc	2024-07-06 18:54:13.811713418 -0700
+diff --git a/libstdc++-v3/libsupc++/Makefile.am b/libstdc++-v3/libsupc++/Makefile.am
+index 2bd25211816..654a77902cf 100644
+--- a/libstdc++-v3/libsupc++/Makefile.am
++++ b/libstdc++-v3/libsupc++/Makefile.am
+@@ -65,6 +65,7 @@ sources = \
+ 	eh_alloc.cc \
+ 	eh_arm.cc \
+ 	eh_aux_runtime.cc \
++  eh_avr.cc \
+ 	eh_call.cc \
+ 	eh_catch.cc \
+ 	eh_exception.cc \
+diff --git a/libstdc++-v3/libsupc++/Makefile.in b/libstdc++-v3/libsupc++/Makefile.in
+index 732ab89c8a2..7198f6c293f 100644
+--- a/libstdc++-v3/libsupc++/Makefile.in
++++ b/libstdc++-v3/libsupc++/Makefile.in
+@@ -155,7 +155,7 @@ am__objects_1 = array_type_info.lo atexit_arm.lo atexit_thread.lo \
+ 	atomicity.lo bad_alloc.lo bad_array_length.lo bad_array_new.lo \
+ 	bad_cast.lo bad_typeid.lo class_type_info.lo del_op.lo \
+ 	del_ops.lo del_opnt.lo del_opv.lo del_opvs.lo del_opvnt.lo \
+-	dyncast.lo eh_alloc.lo eh_arm.lo eh_aux_runtime.lo eh_call.lo \
++	dyncast.lo eh_alloc.lo eh_arm.lo eh_aux_runtime.lo eh_avr.lo eh_call.lo \
+ 	eh_catch.lo eh_exception.lo eh_globals.lo eh_personality.lo \
+ 	eh_ptr.lo eh_term_handler.lo eh_terminate.lo eh_tm.lo \
+ 	eh_throw.lo eh_type.lo eh_unex_handler.lo enum_type_info.lo \
+@@ -528,6 +528,7 @@ sources = \
+ 	eh_alloc.cc \
+ 	eh_arm.cc \
+ 	eh_aux_runtime.cc \
++  eh_avr.cc \
+ 	eh_call.cc \
+ 	eh_catch.cc \
+ 	eh_exception.cc \
+diff --git a/libstdc++-v3/libsupc++/eh_avr.cc b/libstdc++-v3/libsupc++/eh_avr.cc
+new file mode 100644
+index 00000000000..152fb0e4660
+--- /dev/null
++++ b/libstdc++-v3/libsupc++/eh_avr.cc
 @@ -0,0 +1,169 @@
 +#ifdef __AVR_ARCH__
 +
@@ -2144,10 +2101,11 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +
 +}
 +#endif
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc gcc/libstdc++-v3/libsupc++/eh_personality.cc
---- gcc-13.2.0/libstdc++-v3/libsupc++/eh_personality.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/libsupc++/eh_personality.cc	2024-07-06 18:54:13.811713418 -0700
-@@ -333,406 +333,6 @@
+diff --git a/libstdc++-v3/libsupc++/eh_personality.cc b/libstdc++-v3/libsupc++/eh_personality.cc
+index 12391e563d6..91f7825d7cb 100644
+--- a/libstdc++-v3/libsupc++/eh_personality.cc
++++ b/libstdc++-v3/libsupc++/eh_personality.cc
+@@ -333,406 +333,6 @@ empty_exception_spec (lsda_header_info *info, _Unwind_Sword filter_value)
  namespace __cxxabiv1
  {
  
@@ -2554,40 +2512,10 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
  /* The ARM EABI implementation of __cxa_call_unexpected is in a
     different file so that the personality routine (PR) can be used
     standalone.  The generic routine shared datastructures with the PR
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.am gcc/libstdc++-v3/libsupc++/Makefile.am
---- gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.am	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/libsupc++/Makefile.am	2024-07-06 18:54:13.811713418 -0700
-@@ -65,6 +65,7 @@
- 	eh_alloc.cc \
- 	eh_arm.cc \
- 	eh_aux_runtime.cc \
-+  eh_avr.cc \
- 	eh_call.cc \
- 	eh_catch.cc \
- 	eh_exception.cc \
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.in gcc/libstdc++-v3/libsupc++/Makefile.in
---- gcc-13.2.0/libstdc++-v3/libsupc++/Makefile.in	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/libsupc++/Makefile.in	2024-07-06 18:54:13.811713418 -0700
-@@ -155,7 +155,7 @@
- 	atomicity.lo bad_alloc.lo bad_array_length.lo bad_array_new.lo \
- 	bad_cast.lo bad_typeid.lo class_type_info.lo del_op.lo \
- 	del_ops.lo del_opnt.lo del_opv.lo del_opvs.lo del_opvnt.lo \
--	dyncast.lo eh_alloc.lo eh_arm.lo eh_aux_runtime.lo eh_call.lo \
-+	dyncast.lo eh_alloc.lo eh_arm.lo eh_aux_runtime.lo eh_avr.lo eh_call.lo \
- 	eh_catch.lo eh_exception.lo eh_globals.lo eh_personality.lo \
- 	eh_ptr.lo eh_term_handler.lo eh_terminate.lo eh_tm.lo \
- 	eh_throw.lo eh_type.lo eh_unex_handler.lo enum_type_info.lo \
-@@ -528,6 +528,7 @@
- 	eh_alloc.cc \
- 	eh_arm.cc \
- 	eh_aux_runtime.cc \
-+  eh_avr.cc \
- 	eh_call.cc \
- 	eh_catch.cc \
- 	eh_exception.cc \
-diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc gcc/libstdc++-v3/src/c++98/math_stubs_long_double.cc
---- gcc-13.2.0/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2023-07-27 01:13:08.000000000 -0700
-+++ gcc/libstdc++-v3/src/c++98/math_stubs_long_double.cc	2024-07-06 18:54:13.821713416 -0700
+diff --git a/libstdc++-v3/src/c++98/math_stubs_long_double.cc b/libstdc++-v3/src/c++98/math_stubs_long_double.cc
+index b964ea23be2..d63626088e3 100644
+--- a/libstdc++-v3/src/c++98/math_stubs_long_double.cc
++++ b/libstdc++-v3/src/c++98/math_stubs_long_double.cc
 @@ -30,195 +30,195 @@
  
  extern "C"
@@ -2975,3 +2903,275 @@ diff '--exclude=compile_commands.json' '--exclude=.git' '--exclude=obj' -ruN gcc
 +//   }
 +// #endif
  } // extern "C"
+-- 
+2.47.1
+
+
+From 3958df99f7458ec370a93e4197937e2514647e37 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sun, 3 Nov 2024 15:06:08 -0800
+Subject: [PATCH 2/8] __avr_terminate causes a dependency loop, so it had to be
+ changed
+
+TODO: make c++ change avr_terminate_ptr to actually call terminate_handler.
+---
+ libgcc/config/avr/unwind-avr-sup.c | 13 ++++++++++++-
+ libstdc++-v3/libsupc++/eh_avr.cc   |  4 ----
+ 2 files changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/libgcc/config/avr/unwind-avr-sup.c b/libgcc/config/avr/unwind-avr-sup.c
+index 694d684b879..a2192865352 100644
+--- a/libgcc/config/avr/unwind-avr-sup.c
++++ b/libgcc/config/avr/unwind-avr-sup.c
+@@ -5,7 +5,18 @@ extern prog_byte __fae_table_stop[];
+ 
+ typedef const table_entry_t __maybe_flash * table_ptr;
+ 
+-void __avr_terminate() __attribute__((noreturn));
++typedef void (*__avr_terminate_handler_t)() __attribute__((noreturn));
++
++static __attribute__((noreturn)) void __avr_terminate_default_impl(){
++  volatile char c = 0;
++  while(1) {c = 0;}
++}
++
++__avr_terminate_handler_t __avr_terminate_ptr = &__avr_terminate_default_impl;
++
++void __avr_terminate() __attribute__((noreturn)){
++  __avr_terminate_ptr();
++}
+ // no plans to implement forced unwinding
+ void _Unwind_ForcedUnwind() { __avr_terminate(); }
+ 
+diff --git a/libstdc++-v3/libsupc++/eh_avr.cc b/libstdc++-v3/libsupc++/eh_avr.cc
+index 152fb0e4660..a658d89b88b 100644
+--- a/libstdc++-v3/libsupc++/eh_avr.cc
++++ b/libstdc++-v3/libsupc++/eh_avr.cc
+@@ -42,10 +42,6 @@ static void *get_adjusted_ptr(void *exc,
+   return cxa_except->adjustedPtr;
+ }
+ 
+-extern "C" void __avr_terminate() {
+-  std::terminate();
+-}
+-
+ typedef const uint8_t prog_byte;
+ typedef void* void_ptr;
+ typedef const void_ptr *prog_ptr;
+-- 
+2.47.1
+
+
+From 7fe63aa510baa2a55e342c688bec490adb21500b Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sun, 3 Nov 2024 15:36:10 -0800
+Subject: [PATCH 3/8] fix attribute order
+
+---
+ libgcc/config/avr/unwind-avr-sup.c | 2 +-
+ libstdc++-v3/libsupc++/eh_avr.cc   | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libgcc/config/avr/unwind-avr-sup.c b/libgcc/config/avr/unwind-avr-sup.c
+index a2192865352..a9b65f9436f 100644
+--- a/libgcc/config/avr/unwind-avr-sup.c
++++ b/libgcc/config/avr/unwind-avr-sup.c
+@@ -14,7 +14,7 @@ static __attribute__((noreturn)) void __avr_terminate_default_impl(){
+ 
+ __avr_terminate_handler_t __avr_terminate_ptr = &__avr_terminate_default_impl;
+ 
+-void __avr_terminate() __attribute__((noreturn)){
++__attribute__((noreturn)) void __avr_terminate() {
+   __avr_terminate_ptr();
+ }
+ // no plans to implement forced unwinding
+diff --git a/libstdc++-v3/libsupc++/eh_avr.cc b/libstdc++-v3/libsupc++/eh_avr.cc
+index a658d89b88b..6eda3e48cd6 100644
+--- a/libstdc++-v3/libsupc++/eh_avr.cc
++++ b/libstdc++-v3/libsupc++/eh_avr.cc
+@@ -93,6 +93,7 @@ struct personality_out{
+   uint16_t landing_pad;
+ };
+ 
++extern "C" __attribute__((noreturn)) void __avr_terminate();
+ 
+ // this is very bad, and probably should be rewritten in assembly for speed/size
+ extern "C" uint8_t __avr_cxx_personality(prog_byte *ptr, uint16_t pc_offset, void *exc,
+-- 
+2.47.1
+
+
+From b43e6d9daf00d462cb81cd61bed43c89914e6da6 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sun, 3 Nov 2024 18:52:27 -0800
+Subject: [PATCH 4/8] fix LIB2ADDEH override to include default sources
+
+---
+ libgcc/config/avr/t-avr | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libgcc/config/avr/t-avr b/libgcc/config/avr/t-avr
+index 0335608a4bb..681b65bc125 100644
+--- a/libgcc/config/avr/t-avr
++++ b/libgcc/config/avr/t-avr
+@@ -295,4 +295,4 @@ LIB2FUNCS_EXCLUDE += \
+ 	$(foreach func,_ssmul,\
+ 	$(foreach mode,$(ssmul_modes),$(func_X)))
+ 
+-LIB2ADDEH = $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
++LIB2ADDEH += $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
+-- 
+2.47.1
+
+
+From f05f79a1a00cd6c360a2737c958da70bcdeeb2c9 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sun, 3 Nov 2024 22:00:58 -0800
+Subject: [PATCH 5/8] Add weak to unwind symbols so that config overrides it
+
+---
+ gcc/config/avr/avr.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/gcc/config/avr/avr.h b/gcc/config/avr/avr.h
+index 3c5da955dd8..afe700bfee3 100644
+--- a/gcc/config/avr/avr.h
++++ b/gcc/config/avr/avr.h
+@@ -40,6 +40,11 @@ typedef struct
+   const char *section_name;
+ } avr_addrspace_t;
+ 
++
++/* This has to be done so that unwind-avr.S overrides the definition
++   defined in unwind.inc. */
++#define LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
++
+ extern const avr_addrspace_t avr_addrspace[];
+ 
+ /* Known address spaces */
+-- 
+2.47.1
+
+
+From d7e2c56e6df9df4bf1c664415b1b927a4ae064cd Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Fri, 8 Nov 2024 17:48:56 -0800
+Subject: [PATCH 6/8] Revert "Add weak to unwind symbols so that config
+ overrides it"
+
+This reverts commit 6f4d77c6ce69dde1ad0caf05b236b5958a488666.
+As it turns out there's a better way to do this.
+---
+ gcc/config/avr/avr.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/gcc/config/avr/avr.h b/gcc/config/avr/avr.h
+index afe700bfee3..3c5da955dd8 100644
+--- a/gcc/config/avr/avr.h
++++ b/gcc/config/avr/avr.h
+@@ -40,11 +40,6 @@ typedef struct
+   const char *section_name;
+ } avr_addrspace_t;
+ 
+-
+-/* This has to be done so that unwind-avr.S overrides the definition
+-   defined in unwind.inc. */
+-#define LIBGCC2_UNWIND_ATTRIBUTE __attribute__((weak))
+-
+ extern const avr_addrspace_t avr_addrspace[];
+ 
+ /* Known address spaces */
+-- 
+2.47.1
+
+
+From a4ea0e9745e624e81ae2ebf41326ded4268d8d3d Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Fri, 8 Nov 2024 17:49:46 -0800
+Subject: [PATCH 7/8] define _Unwind_DeleteException in unwind-avr-sup.c
+
+ok so as it turns out before because I defined DeleteException as inline,
+which made it work before. Now I'm defining it as a seperate function.
+Doing it this way increases binary bloat, but better conforms to the
+itanium abi. Later I'll figure out a way to reduce the exception handling
+ABI, but for now just put it in unwind-avr-sup.c
+---
+ libgcc/config/avr/t-avr            |  2 +-
+ libgcc/config/avr/unwind-avr-sup.c | 13 +++++++++++--
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/libgcc/config/avr/t-avr b/libgcc/config/avr/t-avr
+index 681b65bc125..0335608a4bb 100644
+--- a/libgcc/config/avr/t-avr
++++ b/libgcc/config/avr/t-avr
+@@ -295,4 +295,4 @@ LIB2FUNCS_EXCLUDE += \
+ 	$(foreach func,_ssmul,\
+ 	$(foreach mode,$(ssmul_modes),$(func_X)))
+ 
+-LIB2ADDEH += $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
++LIB2ADDEH = $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
+diff --git a/libgcc/config/avr/unwind-avr-sup.c b/libgcc/config/avr/unwind-avr-sup.c
+index a9b65f9436f..c2625c6ab0f 100644
+--- a/libgcc/config/avr/unwind-avr-sup.c
++++ b/libgcc/config/avr/unwind-avr-sup.c
+@@ -1,4 +1,5 @@
+ #include "fae.h"
++#include "unwind-generic.h"
+ 
+ extern prog_byte __fae_table_start[];
+ extern prog_byte __fae_table_stop[];
+@@ -8,8 +9,7 @@ typedef const table_entry_t __maybe_flash * table_ptr;
+ typedef void (*__avr_terminate_handler_t)() __attribute__((noreturn));
+ 
+ static __attribute__((noreturn)) void __avr_terminate_default_impl(){
+-  volatile char c = 0;
+-  while(1) {c = 0;}
++  __builtin_trap();
+ }
+ 
+ __avr_terminate_handler_t __avr_terminate_ptr = &__avr_terminate_default_impl;
+@@ -17,6 +17,15 @@ __avr_terminate_handler_t __avr_terminate_ptr = &__avr_terminate_default_impl;
+ __attribute__((noreturn)) void __avr_terminate() {
+   __avr_terminate_ptr();
+ }
++
++void
++_Unwind_DeleteException (struct _Unwind_Exception *exc)
++{
++  if (exc->exception_cleanup)
++    (*exc->exception_cleanup) (_URC_FOREIGN_EXCEPTION_CAUGHT, exc);
++}
++
++
+ // no plans to implement forced unwinding
+ void _Unwind_ForcedUnwind() { __avr_terminate(); }
+ 
+-- 
+2.47.1
+
+
+From c4443481f330f42d2201ec7aec4c4783401cde73 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Fri, 8 Nov 2024 18:08:39 -0800
+Subject: [PATCH 8/8] fixed function signature of _Unwind_ForcedUnwind
+
+---
+ libgcc/config/avr/unwind-avr-sup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libgcc/config/avr/unwind-avr-sup.c b/libgcc/config/avr/unwind-avr-sup.c
+index c2625c6ab0f..75b7d8ec917 100644
+--- a/libgcc/config/avr/unwind-avr-sup.c
++++ b/libgcc/config/avr/unwind-avr-sup.c
+@@ -27,7 +27,7 @@ _Unwind_DeleteException (struct _Unwind_Exception *exc)
+ 
+ 
+ // no plans to implement forced unwinding
+-void _Unwind_ForcedUnwind() { __avr_terminate(); }
++_Unwind_Reason_Code _Unwind_ForcedUnwind(struct _Unwind_Exception *, _Unwind_Stop_Fn, void *) { __avr_terminate(); }
+ 
+ // returns data pointer for pc entry. If no entry is found, return 0
+ table_data __fae_get_ptr(void *except, uint16_t pc) {
+-- 
+2.47.1
+
