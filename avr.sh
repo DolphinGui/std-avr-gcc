@@ -12,19 +12,23 @@ confbuild()
 mkdir -p "$HOST-build-$1"
 cd "$HOST-build-$1"
 ../$1/configure $2
-make -j -l 4
-make install -j -l 4
+make -j -l 8
+make install -j 8
 cd ..
+if [ ! -n "$3" ]; then rm -rdf $HOST-build-$1; fi
 }
 
 export CFLAGS='-Oz -ffunction-sections -fdata-sections'
 export CXXFLAGS='-Oz -ffunction-sections -fdata-sections'
 
 if [ -n "$HOSTFLAG" ]; then
-ARGS="$HOSTFLAG --prefix=/usr/$HOST --enable-static --disable-shared"
-confbuild gmp "$ARGS"
-confbuild mpfr "$ARGS"
-confbuild mpc "$ARGS"
+ARGS="$HOSTFLAG --prefix=$PREFIX --enable-static --disable-shared --cache-file=/out/native-$HOST.cache"
+confbuild gmp "$ARGS" nodelete
+GMPBUILD=$(realpath $HOST-build-gmp)
+confbuild mpfr "$ARGS --with-gmp-build=$GMPBUILD" nodelete
+confbuild mpc "$ARGS --with-gmp=$PREFIX --with-mpfr=$PREFIX" nodelete
+rm -rdf $HOST-build-gmp $HOST-build-mpfr $HOST-build-mpc
+DEPFLAGS="--with-gmp=$PREFIX --with-mpfr=$PREFIX --with-mpc=$PREFIX"
 fi
 
 confbuild binutils "--prefix=$PREFIX --target=avr $HOSTFLAG"
@@ -34,7 +38,7 @@ export PATH=$PREFIX/bin:$PATH
 if ! type avr-gcc; then
 confbuild gcc \
     "--prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls \
-    --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --program-prefix=avr-"
+    --disable-libssp --disable-sjlj-exceptions --with-dwarf2 --program-prefix=avr- --cache-file=/out/avr-$HOST.cache"
 fi
 
 # c compiler needs to be chnaged to avr compiler temporarily
@@ -51,4 +55,5 @@ confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
   --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions \
   --with-dwarf2 --with-avrlibc --disable-__cxa_atexit  --disable-threads --disable-shared \
   --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool  \
- --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2"
+ --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 --cache-file=/out/avr2-$HOST.cache \
+   $DEPFLAGS"

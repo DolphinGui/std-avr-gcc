@@ -28,21 +28,24 @@ parallel --link \
 
 sh apply-patches.sh
 
-export HOST="x86_64-pc-linux-gnu"
-export CROSS_TRIPLE=x86_64-linux-gnu
+# export HOST="x86_64-pc-linux-gnu"
+# export CROSS_TRIPLE=x86_64-linux-gnu
 
-sh avr.sh /out/root
+# sh avr.sh /out/root
 
 export PATH=/out/root/bin:$PATH
 
-export HOST="x86_64-apple-darwin"
-export HOSTFLAG="--host=$HOST"
-export CROSS_TRIPLE=x86_64-apple-darwin
-
-sh avr.sh /out/osxroot
-
 export HOST="x86_64-w64-mingw32"
 export HOSTFLAG="--host=$HOST"
-export CROSS_TRIPLE=x86_64-w64-mingw32
+export CC="$HOST-gcc"
+export CXX="$HOST-g++"
 
 sh avr.sh /out/winroot
+
+# For now it doesn't work because of weird build issues, I'll have to patch binutils some day
+# export HOST="aarch64-apple-darwin24"
+# export HOSTFLAG="--host=$HOST"
+# export CC="$HOST-clang"
+# export CXX="$HOST-clang++"
+
+# sh avr.sh /out/osxroot
