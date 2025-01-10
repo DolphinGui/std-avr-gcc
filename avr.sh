@@ -18,8 +18,9 @@ cd ..
 if [ ! -n "$3" ]; then rm -rdf $HOST-build-$1; fi
 }
 
-export CFLAGS='-Oz -ffunction-sections -fdata-sections'
-export CXXFLAGS='-Oz -ffunction-sections -fdata-sections'
+WARNINGFLAGS='-Wno-mismatched-tags'
+export CFLAGS="-O3 $WARNINGFLAGS"
+export CXXFLAGS="-O3 $WARNINGFLAGS"
 
 if [ -n "$HOSTFLAG" ]; then
 ARGS="$HOSTFLAG --prefix=$PREFIX --enable-static --disable-shared --cache-file=/out/native-$HOST.cache"
@@ -32,9 +33,13 @@ DEPFLAGS="--with-gmp=$PREFIX --with-mpfr=$PREFIX --with-mpc=$PREFIX"
 fi
 
 confbuild binutils "--prefix=$PREFIX --target=avr $HOSTFLAG"
-export PATH=$PREFIX/bin:$PATH
 
-# win build is always expected to happen after unix build, where unix build already has built avr-gcc
+# When cross compiling we can't actually execute binutils
+if [ ! -n "$HOSTFLAG" ]; then
+export PATH=$PREFIX/bin:$PATH
+fi
+
+# canadian build is always expected to happen after unix build, where unix build already has built avr-gcc
 if ! type avr-gcc; then
 confbuild gcc \
     "--prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls \
