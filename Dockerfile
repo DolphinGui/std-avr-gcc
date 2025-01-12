@@ -25,7 +25,9 @@ RUN apt-get install -y   \
     flex  \
     bison \
     atool \
-    parallel
+    parallel \
+    pixz \
+    pigz
 RUN   apt-get clean \
        && rm -rf /var/lib/apt/lists/*
 

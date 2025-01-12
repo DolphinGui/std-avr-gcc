@@ -28,19 +28,18 @@ parallel --link \
 
 sh apply-patches.sh
 
-# export HOST="x86_64-pc-linux-gnu"
-# export CROSS_TRIPLE=x86_64-linux-gnu
+export HOST="x86_64-pc-linux-gnu"
 
-# sh avr.sh /out/root
+sh avr.sh /out/root
 
 export PATH=/out/root/bin:$PATH
 
-# export HOST="x86_64-w64-mingw32"
-# export HOSTFLAG="--host=$HOST"
-# export CC="$HOST-gcc"
-# export CXX="$HOST-g++"
+export HOST="x86_64-w64-mingw32"
+export HOSTFLAG="--host=$HOST"
+export CC="$HOST-gcc"
+export CXX="$HOST-g++"
 
-# sh avr.sh /out/winroot
+sh avr.sh /out/winroot
 
 # darwin always has to be build last because it patches GCC
 
