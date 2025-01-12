@@ -1,7 +1,7 @@
 # AVR-GCC with Exceptions
 
 This is a version of AVR-GCC with patches and additional programs to make exceptions work on AVR. It also comes with
-the standard library, unlike most other releases of avr-gcc I've seen.
+the C++ standard library, unlike most other releases of avr-gcc I've seen.
 
 ## How to use?
 
