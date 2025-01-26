@@ -20,6 +20,8 @@ jobs:
           context: .
           tags: avr-build:latest
           outputs: type=docker,dest=/tmp/avr-build.tar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Compress image
         run: pixz /tmp/avr-build.tar /tmp/avr-build.tar.xz
