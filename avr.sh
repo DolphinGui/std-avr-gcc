@@ -6,6 +6,7 @@
 set -ex
 
 export PREFIX="$1"
+export PATH="/avr/bin:$PATH"
 
 confbuild() {
   mkdir -p "$HOST-build-$1"
