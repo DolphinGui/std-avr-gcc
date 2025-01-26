@@ -51,7 +51,7 @@ jobs:
       - name: Build linux toolchain
         run : |
           mkdir -p /tmp/out
-          docker run --rm --mount type=bind,src=/tmp/out,dst=/out --env HOST avr-build:latest sh avr.sh /out/root
+          docker run --rm --mount type=bind,src=/tmp/out,dst=/out --env HOST avr-build:latest bash avr.sh /out/root
           ls /tmp/out
         env:
           HOST: x86_64-pc-linux-gnu
@@ -119,7 +119,7 @@ jobs:
         run : |
           mkdir -p /tmp/out
           docker run --rm --mount type=bind,src=/tmp/out,dst=/out --mount type=bind,src=/avr/root,dst=/avr \
-            --env HOST --env HOSTFLAG --env CC --env CXX avr-build:latest sh avr.sh /out/root
+            --env HOST --env HOSTFLAG --env CC --env CXX avr-build:latest bash avr.sh /out/root
           ls /tmp/out
         env:
           HOST: x86_64-w64-mingw32
