@@ -2,7 +2,7 @@
 set -ex
 
 links=(
-    https://github.com/DolphinGui/avr-libc/releases/download/main-3/avr-libc.tar.xz
+    https://github.com/DolphinGui/avr-libc/releases/download/main-4/avr-libc.tar.xz
     https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
     https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
     https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz
