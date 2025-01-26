@@ -48,8 +48,9 @@ jobs:
           docker load --input /tmp/avr-build.tar
           rm /tmp/avr-build.tar
       
-      - name: build-linux
+      - name: Build linux toolchain
         run : |
+          mkdir -p /tmp/out
           docker run --rm --mount type=bind,src=/tmp/out,dst=/out avr-build:latest sh avr.sh /out/root
           ls /tmp/out
         env:
@@ -114,8 +115,9 @@ jobs:
           docker load --input /tmp/avr-build.tar
           rm /tmp/avr-build.tar
 
-      - name: build-linux
+      - name: Build windows toolchain
         run : |
+          mkdir -p /tmp/out
           docker run --rm --mount type=bind,src=/tmp/out,dst=/out --mount type=bind,src=/avr/root,dst=/avr \
             avr-build:latest sh avr.sh /out/root
           ls /tmp/out
