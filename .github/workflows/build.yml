@@ -23,17 +23,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Compress image
-        run: pixz /tmp/avr-build.tar /tmp/avr-build.tar.xz
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: avr-build
           path: /tmp/avr-build.tar.xz
           retention-days: 1
-           # Github actions is incapable of managing anything other than zip files for some reason, but
-           # zip is horrifically slow
           compression-level: 0
   build-linux:
     runs-on: ubuntu-latest
@@ -47,9 +42,6 @@ jobs:
         with:
           name: avr-build
           path: /tmp
-        
-      - name: Decompress image
-        run: pixz -d /tmp/avr-build.tar.xz /tmp/avr-build.tar
 
       - name: Load image
         run: |
@@ -98,9 +90,6 @@ jobs:
         with:
           name: avr-build
           path: /tmp
-      
-      - name: Decompress image
-        run: pixz -d /tmp/avr-build.tar.xz /tmp/avr-build.tar
 
       - name: Download base root
         uses: actions/download-artifact@v4
