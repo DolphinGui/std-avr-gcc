@@ -53,8 +53,7 @@ if ! type avr-gcc; then
   export CXX="$TMPCXX"
   # This is kinda stupid, but it beats compiling avr-libc 3 times
   cp -r -T /tmp/avr-libc $PREFIX
-  cp -r -T /tmp/avr-libc /out/winroot
-  cp -r -T /tmp/avr-libc /out/osxroot
+  cp -r -T /tmp/avr-libc /out/baseroot
   rm -rdf  /tmp/avr-libc
 fi
 
