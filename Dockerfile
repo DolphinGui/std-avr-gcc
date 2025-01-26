@@ -35,3 +35,4 @@ COPY avr.sh avr.sh
 COPY work.sh work.sh
 COPY patches patches
 COPY apply-paches.sh apply-patches.sh
+COPY linux.sh linux.sh
