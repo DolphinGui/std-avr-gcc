@@ -5,7 +5,7 @@
 
 set -ex
 
-export PREFIX="$1"
+PREFIX="$1"
 
 confbuild() {
   mkdir -p "$HOST-build-$1"
@@ -63,4 +63,5 @@ confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
   --with-dwarf2 --with-avrlibc --disable-__cxa_atexit  --disable-threads --disable-shared \
   --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool  \
  --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 --cache-file=/out/avr2-$HOST.cache \
+  --enable-cxx-flags=-flto -ffat-lto-objects -fdebug-prefix-map=$PWD=. -ffunction-sections -fdata-sections \
    $DEPFLAGS"
