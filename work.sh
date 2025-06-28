@@ -20,11 +20,11 @@ names=(
     gcc
 )
 
-mkdir -p downloads
+mkdir -p cache
 
 parallel --link \
   'TMP=$(mktemp /tmp/aunpack.XXXXXXXXXX) \
-  && wget -nc {1} -P downloads && ln -s downloads/{1/} {1/} \
+  && wget -nc {1} -P cache && ln -s cache/{1/} {1/} \
   && aunpack -q --save-outdir=$TMP {1/} && DIR=$(cat $TMP) \
   && if [ ! "$DIR" = {2} ]; then mv $DIR {2}; fi; rm $TMP' \
   ::: ${links[@]} ::: ${names[@]}
@@ -32,7 +32,7 @@ parallel --link \
 sh apply-patches.sh
 
 export SCCACHE_CACHE_SIZE="30G"
-export SCCACHE_DIR="/out/cache"
+export SCCACHE_DIR="/work/cache/sccache"
 
 export HOST="x86_64-pc-linux-gnu"
 export CC="sccache gcc"
@@ -40,14 +40,7 @@ export CXX="sccache g++"
 
 sh avr.sh /out/root
 
-mkdir -p cache-stubs
-cd cache-stubs
-ln /usr/bin/sccache avr-gcc
-ln /usr/bin/sccache avr-g++
-cd ..
-
-export PATH=$PATH:/work/cache-stubs:/out/root/bin
-
+export PATH=$PATH:/out/root/bin
 
 export HOST="x86_64-w64-mingw32"
 export HOSTFLAG="--host=$HOST"
