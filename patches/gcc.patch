@@ -2904,7 +2904,7 @@ index b964ea23be2..d63626088e3 100644
 +// #endif
  } // extern "C"
 -- 
-2.47.1
+2.50.0
 
 
 From 3958df99f7458ec370a93e4197937e2514647e37 Mon Sep 17 00:00:00 2001
@@ -2959,7 +2959,7 @@ index 152fb0e4660..a658d89b88b 100644
  typedef void* void_ptr;
  typedef const void_ptr *prog_ptr;
 -- 
-2.47.1
+2.50.0
 
 
 From 7fe63aa510baa2a55e342c688bec490adb21500b Mon Sep 17 00:00:00 2001
@@ -2998,7 +2998,7 @@ index a658d89b88b..6eda3e48cd6 100644
  // this is very bad, and probably should be rewritten in assembly for speed/size
  extern "C" uint8_t __avr_cxx_personality(prog_byte *ptr, uint16_t pc_offset, void *exc,
 -- 
-2.47.1
+2.50.0
 
 
 From b43e6d9daf00d462cb81cd61bed43c89914e6da6 Mon Sep 17 00:00:00 2001
@@ -3021,7 +3021,7 @@ index 0335608a4bb..681b65bc125 100644
 -LIB2ADDEH = $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
 +LIB2ADDEH += $(srcdir)/config/avr/unwind-avr.S $(srcdir)/config/avr/unwind-avr-sup.c
 -- 
-2.47.1
+2.50.0
 
 
 From f05f79a1a00cd6c360a2737c958da70bcdeeb2c9 Mon Sep 17 00:00:00 2001
@@ -3050,7 +3050,7 @@ index 3c5da955dd8..afe700bfee3 100644
  
  /* Known address spaces */
 -- 
-2.47.1
+2.50.0
 
 
 From d7e2c56e6df9df4bf1c664415b1b927a4ae064cd Mon Sep 17 00:00:00 2001
@@ -3082,7 +3082,7 @@ index afe700bfee3..3c5da955dd8 100644
  
  /* Known address spaces */
 -- 
-2.47.1
+2.50.0
 
 
 From a4ea0e9745e624e81ae2ebf41326ded4268d8d3d Mon Sep 17 00:00:00 2001
@@ -3147,7 +3147,7 @@ index a9b65f9436f..c2625c6ab0f 100644
  void _Unwind_ForcedUnwind() { __avr_terminate(); }
  
 -- 
-2.47.1
+2.50.0
 
 
 From c4443481f330f42d2201ec7aec4c4783401cde73 Mon Sep 17 00:00:00 2001
@@ -3173,33 +3173,134 @@ index c2625c6ab0f..75b7d8ec917 100644
  // returns data pointer for pc entry. If no entry is found, return 0
  table_data __fae_get_ptr(void *except, uint16_t pc) {
 -- 
-2.47.1
+2.50.0
 
 
-From a14426aec8305023978d15ec30384e4a502554e7 Mon Sep 17 00:00:00 2001
+From 77202658687c343737c9a53692ede5ec2cbd68f3 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
-Date: Fri, 10 Jan 2025 09:31:03 -0800
-Subject: [PATCH 9/9] Add fdopen on macos via stdio.h:
+Date: Fri, 27 Jun 2025 12:32:31 -0700
+Subject: [PATCH 9/9] hopefully generates .handlerdata and .personality
+ correctly
 
 ---
- zlib/zutil.h | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ gcc/config/avr/avr-protos.h |  1 +
+ gcc/config/avr/avr.cc       | 22 ++++++++++++++++------
+ gcc/config/avr/avr.h        |  1 +
+ gcc/defaults.h              |  5 +++++
+ gcc/except.cc               |  1 +
+ 5 files changed, 24 insertions(+), 6 deletions(-)
 
-diff --git a/zlib/zutil.h b/zlib/zutil.h
-index 4b596adf629..321b75f3122 100644
---- a/zlib/zutil.h
-+++ b/zlib/zutil.h
-@@ -136,9 +136,7 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
- #    if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
- #      include <unix.h> /* for fdopen */
- #    else
--#      ifndef fdopen
--#        define fdopen(fd,mode) NULL /* No fdopen() */
--#      endif
-+#      include <stdio.h> /* Modern versions of macos probably have fdopen */
- #    endif
- #  endif
+diff --git a/gcc/config/avr/avr-protos.h b/gcc/config/avr/avr-protos.h
+index 242946b87a4..a1a43ad3952 100644
+--- a/gcc/config/avr/avr-protos.h
++++ b/gcc/config/avr/avr-protos.h
+@@ -89,6 +89,7 @@ extern rtx avr_to_int_mode (rtx);
+ extern void avr_expand_prologue (void);
+ extern void avr_expand_epilogue (bool);
+ extern rtx avr_eh_return_handler_rtx (void);
++extern void avr_output_handlerdata(void);
+ extern bool avr_emit_cpymemhi (rtx*);
+ extern int avr_epilogue_uses (int regno);
+ 
+diff --git a/gcc/config/avr/avr.cc b/gcc/config/avr/avr.cc
+index 488e52f6a5d..f3098285c20 100644
+--- a/gcc/config/avr/avr.cc
++++ b/gcc/config/avr/avr.cc
+@@ -1517,8 +1517,14 @@ avr_output_fn_unwind (FILE * f, bool prologue)
+     && (TREE_NOTHROW (current_function_decl)
+         || crtl->all_throwers_are_sibcalls))
+   fputs("\t.cantunwind\n", f);
+-      fputs ("\t.fnstart\n", f);}
+-  else
++      fputs ("\t.fnstart\n", f);
++
++ if(crtl->uses_eh_lsda)
++        fputs("\t.personality\t__avr_cxx_personality\n", f);
++
++  }
++
++       else
+     {
+      
+ 
+@@ -1526,6 +1532,12 @@ avr_output_fn_unwind (FILE * f, bool prologue)
+     }
+ }
+ 
++
++#define EH_LSDA_POST avr_output_handlerdata()
++void avr_output_handlerdata(void){
++  output_section_asm_op(".handlerdata\n");
++}
++
+ /*  Emit unwind directives for a SET.  */
+ 
+ static void
+@@ -10989,7 +11001,7 @@ avr_output_bss_section_asm_op (const char *data)
+   avr_need_clear_bss_p = true;
+ 
+   /* Dispatch to default.  */
+-  output_section_asm_op (data);
++  output_section_asm_op  (data);
+ }
+ 
+ 
+@@ -11055,14 +11067,12 @@ avr_output_addr_attrib (tree decl, const char *name,
+ 
+ 
+ /* Implement `TARGET_ASM_INIT_SECTIONS'.  */
+-
+ static void
+ avr_asm_init_sections (void)
+ {
+   /* Override section callbacks to keep track of `avr_need_clear_bss_p'
+      resp. `avr_need_copy_data_p'.  If flash is not mapped to RAM then
+-     we have also to track .rodata because it is located in RAM then.  */
+-
++     we have also to track .rodata because it is located in RAM then.  */ 
+ #if defined HAVE_LD_AVR_AVRXMEGA3_RODATA_IN_FLASH
+   if (avr_arch->flash_pm_offset == 0)
  #endif
+diff --git a/gcc/config/avr/avr.h b/gcc/config/avr/avr.h
+index 3c5da955dd8..d5a2faf23f1 100644
+--- a/gcc/config/avr/avr.h
++++ b/gcc/config/avr/avr.h
+@@ -535,6 +535,7 @@ extern const char *avr_no_devlib (int, const char**);
+ #define ASM_PREFERRED_EH_DATA_FORMAT(CODE, GLOBAL)           (DW_EH_PE_absptr)
+ #define EH_RETURN_HANDLER_RTX avr_eh_return_handler_rtx ()
+ 
++#define EH_LSDA_POST avr_output_handlerdata ()
+ 
+ #define DWARF2_ADDR_SIZE 4
+ 
+diff --git a/gcc/defaults.h b/gcc/defaults.h
+index dc6f09cacae..068ce278d80 100644
+--- a/gcc/defaults.h
++++ b/gcc/defaults.h
+@@ -393,6 +393,11 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
+ #define EH_RETURN_DATA_REGNO(N) INVALID_REGNUM
+ #endif
+ 
++/* A hook for adding stuff after the LSDA section has been switched to */
++#ifndef EH_LSDA_POST
++#define EH_LSDA_POST
++#endif
++
+ /* Offset between the eh handler address and entry in eh tables.  */
+ #ifndef RETURN_ADDR_OFFSET
+ #define RETURN_ADDR_OFFSET 0
+diff --git a/gcc/except.cc b/gcc/except.cc
+index e728aa43b6a..76e6d124339 100644
+--- a/gcc/except.cc
++++ b/gcc/except.cc
+@@ -2952,6 +2952,7 @@ switch_to_exception_section (const char * ARG_UNUSED (fnname))
+     }
+ 
+   switch_to_section (s);
++  EH_LSDA_POST;
+ }
+ 
+ /* Output a reference from an exception table to the type_info object TYPE.
 -- 
-2.47.1
+2.50.0
 

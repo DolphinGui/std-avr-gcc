@@ -7,18 +7,17 @@ set -ex
 
 PREFIX="$1"
 
+cores=$(nproc)
+
 confbuild() {
   mkdir -p "$HOST-build-$1"
   cd "$HOST-build-$1"
   ../$1/configure $2
-  make -j -l 8
-  make install -j 8
+  make -j -l $cores
+  make install -j $cores
   cd ..
   if [ ! -n "$3" ]; then rm -rdf $HOST-build-$1; fi
 }
-
-export CFLAGS="-O3"
-export CXXFLAGS="-O3 -Wno-mismatched-tags"
 
 if [ -n "$HOSTFLAG" ]; then
   ARGS="$HOSTFLAG --prefix=$PREFIX --enable-static --disable-shared --cache-file=/out/native-$HOST.cache"
@@ -58,10 +57,19 @@ if ! type avr-gcc; then
   rm -rdf  /tmp/avr-libc
 fi
 
-confbuild gcc "--prefix=$PREFIX  --target=avr $HOSTFLAG \
+# This is dumb, but for some reason parameter expansion reacts poorly with the
+# enable-cxx-flags parameter
+
+mkdir -p "$HOST-build-gcc"
+cd "$HOST-build-gcc"
+../gcc/configure --prefix=$PREFIX  --target=avr $HOSTFLAG \
   --enable-languages=c,c++ --disable-nls --disable-libssp --disable-sjlj-exceptions \
   --with-dwarf2 --with-avrlibc --disable-__cxa_atexit  --disable-threads --disable-shared \
   --enable-libstdcxx --disable-bootstrap --enable-libstdcxx-static-eh-pool  \
- --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 --cache-file=/out/avr2-$HOST.cache \
-  --enable-cxx-flags=-flto -ffat-lto-objects -fdebug-prefix-map=$PWD=. -ffunction-sections -fdata-sections \
-   $DEPFLAGS"
+  --program-prefix=avr- --disable-libstdcxx-verbose --with-libstdcxx-eh-pool-obj-count=2 --cache-file=/out/avr2-$HOST.cache \
+  --enable-cxx-flags='-flto -ffat-lto-objects' --with-debug-prefix-map='/work=.' $DEPFLAGS
+   
+make -j -l $cores
+make install -j $cores
+cd ..
+rm -rdf $HOST-build-gcc

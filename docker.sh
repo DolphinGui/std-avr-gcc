@@ -4,8 +4,7 @@ set -ex
 
 podman build -t avr-build .
 mkdir -p out
-podman run avr-build bash work.sh
-# docker run --mount type=bind,src="$(pwd)"/out,dst=/out avr-build bash work.sh
+podman run --mount type=bind,src="$(pwd)"/out,dst=/out --mount type=bind,src="$(pwd)"/downloads,dst=/work/downloads  avr-build bash work.sh
 # cd out
 # tar -Ipigz -cf root.tar.xz root/
 # tar -Ipigz -cf winroot.tar.xz winroot/

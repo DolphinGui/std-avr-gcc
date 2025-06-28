@@ -6,8 +6,8 @@ WORKDIR /work
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-    && apt-get upgrade -y
-RUN apt-get install -y   \
+    && apt-get upgrade -y \
+    && apt-get install -y   \
     gcc-12  \
     mingw-w64  \
     git  \
@@ -27,7 +27,8 @@ RUN apt-get install -y   \
     atool \
     parallel \
     pixz \
-    pigz
+    pigz \
+    sccache
 RUN   apt-get clean \
        && rm -rf /var/lib/apt/lists/*
 
