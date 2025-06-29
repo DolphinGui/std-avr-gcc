@@ -3,7 +3,7 @@ set -ex
 set -uo pipefail
 
 links=(
-    https://github.com/DolphinGui/avr-libc/releases/download/main-4/avr-libc.tar.xz
+    https://github.com/DolphinGui/avr-libc/releases/download/main-5/avr-libc.tar.xz
     https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
     https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
     https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
@@ -51,7 +51,7 @@ sh avr.sh /out/winroot
 
 # darwin always has to be build last because it patches GCC
 
-export HOST="aarch64-apple-darwin24"
+export HOST="x86_64-apple-darwin24"
 export HOSTFLAG="--host=$HOST"
 export CC="sccache $HOST-gcc"
 export CXX="sccache $HOST-g++"
