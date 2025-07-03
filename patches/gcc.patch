@@ -1,7 +1,8 @@
 From 5fc0d82a98fb23a8e1c7a658b411e99ec3f45ca8 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Sat, 2 Nov 2024 19:20:11 -0700
-Subject: [PATCH 1/9] move patches to 13.2.0 release instead of random release
+Subject: [PATCH 01/11] move patches to 13.2.0 release instead of random
+ release
 
 ---
  gcc/common/config/avr/avr-common.cc           |  12 +-
@@ -2910,8 +2911,8 @@ index b964ea23be2..d63626088e3 100644
 From 3958df99f7458ec370a93e4197937e2514647e37 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Sun, 3 Nov 2024 15:06:08 -0800
-Subject: [PATCH 2/9] __avr_terminate causes a dependency loop, so it had to be
- changed
+Subject: [PATCH 02/11] __avr_terminate causes a dependency loop, so it had to
+ be changed
 
 TODO: make c++ change avr_terminate_ptr to actually call terminate_handler.
 ---
@@ -2965,7 +2966,7 @@ index 152fb0e4660..a658d89b88b 100644
 From 7fe63aa510baa2a55e342c688bec490adb21500b Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Sun, 3 Nov 2024 15:36:10 -0800
-Subject: [PATCH 3/9] fix attribute order
+Subject: [PATCH 03/11] fix attribute order
 
 ---
  libgcc/config/avr/unwind-avr-sup.c | 2 +-
@@ -3004,7 +3005,7 @@ index a658d89b88b..6eda3e48cd6 100644
 From b43e6d9daf00d462cb81cd61bed43c89914e6da6 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Sun, 3 Nov 2024 18:52:27 -0800
-Subject: [PATCH 4/9] fix LIB2ADDEH override to include default sources
+Subject: [PATCH 04/11] fix LIB2ADDEH override to include default sources
 
 ---
  libgcc/config/avr/t-avr | 2 +-
@@ -3027,7 +3028,7 @@ index 0335608a4bb..681b65bc125 100644
 From f05f79a1a00cd6c360a2737c958da70bcdeeb2c9 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Sun, 3 Nov 2024 22:00:58 -0800
-Subject: [PATCH 5/9] Add weak to unwind symbols so that config overrides it
+Subject: [PATCH 05/11] Add weak to unwind symbols so that config overrides it
 
 ---
  gcc/config/avr/avr.h | 5 +++++
@@ -3056,7 +3057,7 @@ index 3c5da955dd8..afe700bfee3 100644
 From d7e2c56e6df9df4bf1c664415b1b927a4ae064cd Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Fri, 8 Nov 2024 17:48:56 -0800
-Subject: [PATCH 6/9] Revert "Add weak to unwind symbols so that config
+Subject: [PATCH 06/11] Revert "Add weak to unwind symbols so that config
  overrides it"
 
 This reverts commit 6f4d77c6ce69dde1ad0caf05b236b5958a488666.
@@ -3088,7 +3089,7 @@ index afe700bfee3..3c5da955dd8 100644
 From a4ea0e9745e624e81ae2ebf41326ded4268d8d3d Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Fri, 8 Nov 2024 17:49:46 -0800
-Subject: [PATCH 7/9] define _Unwind_DeleteException in unwind-avr-sup.c
+Subject: [PATCH 07/11] define _Unwind_DeleteException in unwind-avr-sup.c
 
 ok so as it turns out before because I defined DeleteException as inline,
 which made it work before. Now I'm defining it as a seperate function.
@@ -3153,7 +3154,7 @@ index a9b65f9436f..c2625c6ab0f 100644
 From c4443481f330f42d2201ec7aec4c4783401cde73 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Fri, 8 Nov 2024 18:08:39 -0800
-Subject: [PATCH 8/9] fixed function signature of _Unwind_ForcedUnwind
+Subject: [PATCH 08/11] fixed function signature of _Unwind_ForcedUnwind
 
 ---
  libgcc/config/avr/unwind-avr-sup.c | 2 +-
@@ -3179,7 +3180,7 @@ index c2625c6ab0f..75b7d8ec917 100644
 From 77202658687c343737c9a53692ede5ec2cbd68f3 Mon Sep 17 00:00:00 2001
 From: Shin Umeda <umeda.shin@gmail.com>
 Date: Fri, 27 Jun 2025 12:32:31 -0700
-Subject: [PATCH 9/9] hopefully generates .handlerdata and .personality
+Subject: [PATCH 09/11] hopefully generates .handlerdata and .personality
  correctly
 
 ---
@@ -3301,6 +3302,64 @@ index e728aa43b6a..76e6d124339 100644
  }
  
  /* Output a reference from an exception table to the type_info object TYPE.
+-- 
+2.50.0
+
+
+From 2a923ccbfffc856b4621b5d07462cabfbac5a744 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Sat, 28 Jun 2025 22:05:51 -0700
+Subject: [PATCH 10/11] mark avr_cxx_personality as used so LTO doesn't
+ eliminate it
+
+---
+ libstdc++-v3/libsupc++/eh_avr.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libstdc++-v3/libsupc++/eh_avr.cc b/libstdc++-v3/libsupc++/eh_avr.cc
+index 6eda3e48cd6..a2727789677 100644
+--- a/libstdc++-v3/libsupc++/eh_avr.cc
++++ b/libstdc++-v3/libsupc++/eh_avr.cc
+@@ -96,6 +96,7 @@ struct personality_out{
+ extern "C" __attribute__((noreturn)) void __avr_terminate();
+ 
+ // this is very bad, and probably should be rewritten in assembly for speed/size
++__attribute__((__used__))
+ extern "C" uint8_t __avr_cxx_personality(prog_byte *ptr, uint16_t pc_offset, void *exc,
+                            personality_out *out) noexcept {
+   uint8_t lp_encoding = get(ptr++);
+-- 
+2.50.0
+
+
+From dd5ff9521264e57600c705ceee47bdb5ab146745 Mon Sep 17 00:00:00 2001
+From: Shin Umeda <umeda.shin@gmail.com>
+Date: Thu, 3 Jul 2025 10:38:33 -0700
+Subject: [PATCH 11/11] For now, I'm giving up on exceptions.
+
+Maybe somebody else with more time can try this. Just revert
+this commit and debug it for yourself. For now, I'd like to
+move on to other projects.
+---
+ gcc/config/avr/specs.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gcc/config/avr/specs.h b/gcc/config/avr/specs.h
+index 1a4fdb9c0b5..2610eaa8541 100644
+--- a/gcc/config/avr/specs.h
++++ b/gcc/config/avr/specs.h
+@@ -40,9 +40,9 @@ along with GCC; see the file COPYING3.  If not see
+ #undef  CC1PLUS_SPEC
+ #define CC1PLUS_SPEC                                    \
+   "%(cc1) "                                             \
+-  "%{!frtti:-frtti} "                                \
++  "%{!frtti:-fno-rtti} "                                \
+   "%{!fenforce-eh-specs:-fno-enforce-eh-specs} "        \
+-  "%{!fexceptions:-fexceptions} "
++  "%{!fexceptions:-fno-exceptions} "
+ 
+ #define ASM_RELAX_SPEC                          \
+   "%{mrelax:--mlink-relax} "
 -- 
 2.50.0
 

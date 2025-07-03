@@ -28,7 +28,8 @@ RUN apt-get update \
     parallel \
     pixz \
     pigz \
-    sccache
+    sccache \
+    python3
 RUN   apt-get clean \
        && rm -rf /var/lib/apt/lists/*
 

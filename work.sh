@@ -3,7 +3,7 @@ set -ex
 set -uo pipefail
 
 links=(
-    https://github.com/DolphinGui/avr-libc/releases/download/main-5/avr-libc.tar.xz
+    https://github.com/DolphinGui/avr-libc/archive/refs/heads/main.zip
     https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.gz
     https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
     https://ftp.gnu.org/gnu/mpfr/mpfr-4.2.2.tar.xz
@@ -28,6 +28,10 @@ parallel --link \
   && aunpack -q --save-outdir=$TMP {1/} && DIR=$(cat $TMP) \
   && if [ ! "$DIR" = {2} ]; then mv $DIR {2}; fi; rm $TMP' \
   ::: ${links[@]} ::: ${names[@]}
+
+cd avr-libc
+./bootstrap
+cd ..
 
 sh apply-patches.sh
 
